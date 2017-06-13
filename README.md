@@ -33,6 +33,28 @@ var participant = "0xa2a069c92c8f41e8433adf1609e335af035eb17b";
 var ETHLottery = eth.contract(abi).at(address);
 ```
 
+### Public methods (read only)
+
+```shell
+// See lottery status, open (true/false) 
+ETHLottery.open()
+
+// See total prize accumulate 
+ETHLottery.total()
+
+// See jackpot amount 
+ETHLottery.jackpot()
+
+// See betting minimum fee amount
+ETHLottery.fee()
+
+// See owner fee amount in percentage of total
+ETHLottery.owner_fee()
+
+// See lottery result, only when open=false 
+ETHLottery.result()
+```
+
 ### Betting / Playing
 ```shell
 // set the amount to pay the minimum fee to 1 ETH
