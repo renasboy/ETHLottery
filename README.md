@@ -38,12 +38,24 @@ var ETHLottery = eth.contract(abi).at(address);
 // set the amount to pay the minimum fee to 1 ETH
 var amount = web3.toWei(1, "ether");
 
+// unlock the participant account / wallet
+web3.personal.unlockAccount(participant, "YOUR_VERY_SECRET_PASSWORD")
+
 // call the play function passing the guess as a single char string
 ETHLottery.play("a", {from: participant, value: amount});
+
+// make sure you lock the account again
+web3.personal.lockAccount(participant)
 ```
 
 ### Withdraw prize
 ```shell
+// unlock the participant account / wallet
+web3.personal.unlockAccount(participant, "YOUR_VERY_SECRET_PASSWORD")
+
 // withdraw the prize, after ETHLottery is closed, only for winners
 ETHLottery.withdraw({from: participant);
+
+// make sure you lock the account again
+web3.personal.lockAccount(participant)
 ```
