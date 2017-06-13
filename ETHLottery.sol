@@ -92,4 +92,3 @@ contract ETHLottery {
         selfdestruct(owner);
     }
 }
-
