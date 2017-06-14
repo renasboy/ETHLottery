@@ -14,7 +14,7 @@ The lottery closes after the prize reaches the jackpot.
 
 The lottery fee, the owner fee and the jackpot are values set when the contract is created and are 100% public and immutable in the blockchain.
 
-## How to play
+## How to play with geth on CLI
 
 To send a bet create a transaction to the contract address with your bet and the minimal fee.
 
@@ -80,4 +80,11 @@ ETHLottery.withdraw({from: participant);
 
 // make sure you lock the account again
 web3.personal.lockAccount(participant)
+```
+
+## How to play with js GUI
+
+### Install dependency
+```shell
+npm install web3 bignumber
 ```
