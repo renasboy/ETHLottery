@@ -1,0 +1,37 @@
+{
+  "name": "eth-lottery",
+  "version": "0.1.0",
+  "description": "open source crypto loterry",
+  "contributors": [
+    {
+      "name": "Renato Cardoso"
+    },
+    {
+      "name": "Renato Cavallari"
+    }
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renasboy/ETHLottery.git"
+  },
+  "keywords": [
+    "loterry",
+    "solidity",
+    "geth",
+    "ether",
+    "ethercoin"
+  ],
+  "author": "renatos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/renasboy/ETHLottery/issues"
+  },
+  "homepage": "https://github.com/renasboy/ETHLottery#readme",
+  "devDependencies": {
+    "geth": "^0.3.0"
+  }
+}
