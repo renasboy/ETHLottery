@@ -93,6 +93,7 @@ npm install web3 bignumber
 
 ## How to run your own ETHLottery
 
+### Create a new lottery
 ```shell
 // Set betting minimum fee amount to 1 ETH
 var fee = 1;
@@ -120,6 +121,21 @@ web3.personal.unlockAccount(owner, "YOUR_VERY_SECRET_PASSWORD");
 // create contract
 var contract = web3.eth.contract(abi);
 var ETHLottery = contract.new(fee, jackpot, owner_fee, { from: owner, data: code, gas: 1000000 });
+
+// Make sure you lock the owner account
+web3.personal.lockAccount(owner);
+```
+
+### Send the result and find out the winners 
+
+```shell
+// After the lottery closes you can send the 10th block hash via lottery
+
+// Unlock the owner account
+web3.personal.unlockAccount(owner, "YOUR_VERY_SECRET_PASSWORD");
+
+// send the lottery result 
+ETHLottery.lottery(0x31);
 
 // Make sure you lock the owner account
 web3.personal.lockAccount(owner);
