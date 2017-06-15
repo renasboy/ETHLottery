@@ -4,6 +4,8 @@ The Ethereum Block Hash Lottery
 
 ETHLottery is a 100% fair lottery based on Ethereum blockchain technology, where the result is chosen based on a certain Ethereum Block Hash created in the future, therefore impossible to guess and temper with.
 
+ETHLottery was designed to save as much gas as possible keeping the interactions to a minimum and a tidy contract code and logic.
+
 ## How it works
 
 Each round starts with an empty Ethereum smart contract, where participants can make bets by sending a minimal fee and trying to guess which is the exact last character of a certain Ethereum Block Hash generated only and really *only* after the lottery is closed.
