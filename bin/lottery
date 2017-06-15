@@ -1,0 +1,19 @@
+#!/bin/bash
+
+geth=~/go-ethereum/build/bin/geth
+date=$(date +%s)
+lottery_file=bin/lottery_${date}.js
+
+# TODO make args of those vars
+owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
+lottery="0x6bc2c693f6426602ae323a922c9579cb8e9a8128"
+result="0x00"
+
+. bin/compile
+
+sed -e 's/LOTTERY/'$lottery'/' \
+    -e 's/RESULT/'$result'/' \
+    -e 's/ABI/'$abi'/' \
+    -e 's/OWNER/'$owner'/' bin/lottery.tpl.js > $lottery_file
+
+$geth --testnet --datadir ~/eth-testnet js $lottery_file --unlock $owner

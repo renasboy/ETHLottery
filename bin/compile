@@ -1,0 +1,9 @@
+#!/bin/bash
+
+solc=~/solidity/build/solc/solc
+
+abi=$($solc --abi ETHLottery.sol | tail -1)
+echo $abi
+
+code=$($solc --bin ETHLottery.sol | tail -1)
+echo $code
