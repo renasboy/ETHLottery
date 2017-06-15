@@ -13,17 +13,30 @@ div {
 div span {
     font-weight: normal;
 }
+#error {
+    color: #f00;
+}
 </style>
 </head>
 
 <body>
     <h1>ETHLottery</h1>
+
+    <h1>Lottery Info</h1>
     <div>ADDRESS: <span id="address"></span></div> 
     <div>OPEN: <span id="open"></span></div> 
     <div>TOTAL ACCUMULATED: <span id="total"></span> <span>ETH</span></div> 
     <div>OWNER FEE: <span id="owner-fee"></span> <span>%</span></div> 
     <div>FEE: <span id="fee"></span> <span>ETH</span></div> 
     <div>RESULT: <span id="result"></span></div> 
+
+    <h1>Play</h1>
+    <div id="error"></div>
+    <div>LAST TX HASH CHAR: <input size="2" id="play" maxlength="1"> <input type="button" value="go lucky char" onClick="play();"></div>
+    <div>PLAY FROM: <select id="participant"></select> <input type="password" id="pass" placeholder="password"></div>
+    <div>WITHDRAW: <input type="button" value="go get my ETHs" onClick="withdraw();"></div>
+
+
 
 <script type="text/javascript">
 
@@ -34,11 +47,17 @@ div span {
 
     var abi = [{"constant":true,"inputs":[],"name":"owner_fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"getValue","outputs":[{"name":"","type":"uint256"}],"payable":true,"type":"function"},{"constant":false,"inputs":[],"name":"destruct","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"lottery","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result","outputs":[{"name":"","type":"bytes1"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"jackpot","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"play","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"open","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"inputs":[{"name":"_fee","type":"uint256"},{"name":"_jackpot","type":"uint256"},{"name":"_owner_fee","type":"uint256"}],"payable":false,"type":"constructor"}];
 
-    var address = "0x4b8ed55eac499816532a5388373bfff0398c8203";
+    var address = "0xa55e4642e1630d6b49d6727b700dc15cac19fe72";
  
     var ETHLottery = web3.eth.contract(abi).at(address);
 
-    var participant = web3.eth.coinbase;
+    var select = document.getElementById('participant');
+    for (var i = 0; i < web3.eth.accounts.length; i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = web3.eth.accounts[i];
+        opt.value = web3.eth.accounts[i];
+        select.appendChild(opt);
+    }
 
     document.getElementById('address').innerText = address;
 
@@ -59,21 +78,44 @@ div span {
     });
 
     ETHLottery.result(function (e, c) {
-        document.getElementById('result').innerText = c;
+        document.getElementById('result').innerText = c == "0x00" ? 'N/A' : String.fromCharCode(c);
     });
     
-    function play (guess) {
+    function play () {
+        document.getElementById('error').innerText = "";
+        var participant = select.options[select.selectedIndex].value;
+        var pass = document.getElementById('pass').value;
+        var guess = document.getElementById('play').value;
         if (guess.length == 1) {
-            var fee = new BigNumber(document.getElementById('fee').text);
+            var fee = new BigNumber(document.getElementById('fee').innerText * 1000000000000000000);
+            web3.personal.unlockAccount(participant, pass);
             ETHLottery.play(guess, { from : participant, value: fee }, function (e, c) {
-                console.log('played');
+                web3.personal.lockAccount(participant);
+                if (e) {
+                    document.getElementById('error').innerText = e.message;
+                    console.log(e.message);
+                }
+                if (c) {
+                    console.log(c);
+                }
             });
         }
     }
 
     function withdraw () {
+        document.getElementById('error').innerText = "";
+        var participant = select.options[select.selectedIndex].value;
+        var pass = document.getElementById('pass').value;
+        web3.personal.unlockAccount(participant, pass);
         ETHLottery.withdraw({ from : participant }), function (e, c) {
-            console.log('withdraw requested');
+            web3.personal.lockAccount(participant);
+            if (e) {
+                document.getElementById('error').innerText = e.message;
+                console.log(e.message);
+            }
+            if (c) {
+                console.log(c);
+            }
         };
     }
 
