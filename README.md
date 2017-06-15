@@ -1,14 +1,14 @@
 # ETHLottery
 
-The Ethereum TX Hash Lottery
+The Ethereum Block Hash Lottery
 
-ETHLottery is a 100% fair lottery based on Ethereum blockchain technology, where the result is chosen based on a certain Ethereum Tx Hash made in the future, therefore impossible to guess and temper with.
+ETHLottery is a 100% fair lottery based on Ethereum blockchain technology, where the result is chosen based on a certain Ethereum Block Hash created in the future, therefore impossible to guess and temper with.
 
 ## How it works
 
-Each round starts with an empty Ethereum smart contract, where participants can make bets by sending a minimal fee and trying to guess which is the exact last character of the Ethereum Tx Hash generated only and really *only* after the lottery is closed.
+Each round starts with an empty Ethereum smart contract, where participants can make bets by sending a minimal fee and trying to guess which is the exact last character of a certain Ethereum Block Hash generated only and really *only* after the lottery is closed.
 
-The Ethereum Tx Hash used as lottery result belongs to the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this happens only once and only when the lottery is closed.
+The Ethereum Block Hash used as lottery result belongs to the 10th block after the block containing the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this happens only once and only when the lottery is closed.
 
 The lottery closes after the prize reaches the jackpot.
 
@@ -16,7 +16,7 @@ The lottery fee, the owner fee and the jackpot are values set when the contract 
 
 ## How to play with geth on CLI
 
-To send a bet create a transaction to the contract address with your bet and the minimal fee.
+To send a bet, create a transaction to the contract address with your guess and the payment for the minimal fee.
 
 ### Preparations
 ```shell
