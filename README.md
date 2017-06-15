@@ -18,7 +18,7 @@ The lottery fee, the owner fee and the jackpot are values set when the contract 
 
 ## How to play with geth on CLI
 
-To send a bet, create a transaction to the contract address with your guess and the payment for the minimal fee.
+To send a bet, create a transaction to the contract address calling the function play() with your guess and the payment for the minimal fee.
 
 ### Preparations
 ```shell

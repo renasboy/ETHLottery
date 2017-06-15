@@ -1,7 +1,7 @@
 {
   "name": "eth-lottery",
   "version": "0.1.0",
-  "description": "open source crypto loterry",
+  "description": "The Ethereum Block Hash Lottery",
   "contributors": [
     {
       "name": "Renato Cardoso"
@@ -19,13 +19,16 @@
     "url": "git+https://github.com/renasboy/ETHLottery.git"
   },
   "keywords": [
-    "loterry",
+    "ethereum",
+    "ether",
+    "lottery",
+    "blockchain",
     "solidity",
     "geth",
     "ether",
     "ethercoin"
   ],
-  "author": "renatos",
+  "author": "r2goo",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/renasboy/ETHLottery/issues"
