@@ -1,13 +1,20 @@
 #!/bin/bash
 
+usage () {
+    echo "Usage $0 FEE JACKPOT OWNER_FEE"
+    exit 1
+}
+
+[[ -n "$1" && -n "$2" && -n "$3" ]] || usage
+
+
 geth=~/go-ethereum/build/bin/geth
 date=$(date +%s)
-deploy_file=bin/deploy_${date}.js
+deploy_file=managers/deploy_${date}.js
 
-# TODO make args of those vars
-fee=1
-jackpot=10
-owner_fee=2
+fee=$1
+jackpot=$2
+owner_fee=$3
 owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
 
 . bin/compile

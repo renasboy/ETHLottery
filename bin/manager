@@ -1,5 +1,5 @@
 #!/bin/bash
 
-./bin/deploy
+./bin/deploy 1 10 2
 ./bin/lottery
 ./bin/destruct

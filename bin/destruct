@@ -1,12 +1,18 @@
 #!/bin/bash
 
+usage () {
+    echo "Usage $0 LOTTERY"
+    exit 1
+}
+
+[[ -n "$1" ]] || usage
+
 geth=~/go-ethereum/build/bin/geth
 date=$(date +%s)
-destruct_file=bin/destruct_${date}.js
+destruct_file=managers/destruct_${date}.js
 
-# TODO make args of those vars
 owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
-lottery="0xa55e4642e1630d6b49d6727b700dc15cac19fe72"
+lottery="$1"
 
 . bin/compile
 

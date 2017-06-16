@@ -1,13 +1,20 @@
 #!/bin/bash
 
+usage () {
+    echo "Usage $0 LOTTERY RESULT"
+    exit 1
+}
+
+[[ -n "$1" && -n "$2" ]] || usage
+
 geth=~/go-ethereum/build/bin/geth
 date=$(date +%s)
-lottery_file=bin/lottery_${date}.js
+lottery_file=managers/lottery_${date}.js
 
 # TODO make args of those vars
 owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
-lottery="0xa55e4642e1630d6b49d6727b700dc15cac19fe72"
-result="5"
+lottery="$1"
+result="$2"
 
 . bin/compile
 
