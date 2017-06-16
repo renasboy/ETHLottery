@@ -1,13 +1,13 @@
 pragma solidity ^0.4.11;
 
 contract ETHLottery {
-    address owner;
-    bool open;
-    uint256 jackpot;
-    uint256 total;
-    uint256 fee;
-    uint256 owner_fee;
-    bytes1 result;
+    address public owner;
+    bool public open;
+    uint256 public jackpot;
+    uint256 public total;
+    uint256 public fee;
+    uint256 public owner_fee;
+    bytes1 public result;
 
     mapping (bytes1 => address[]) bettings;
     mapping (address => uint256) credits;
