@@ -16,4 +16,5 @@ sed -e 's/LOTTERY/'$lottery'/' \
     -e 's/OWNER/'$owner'/' \
     -e 's/ABI/'$abi'/' bin/lottery.tpl.js > $lottery_file
 
-$geth --testnet --datadir ~/eth-testnet js $lottery_file --unlock $owner
+echo "LOTTERY COMMAND"
+echo $geth --testnet --datadir ~/eth-testnet js $lottery_file --unlock $owner

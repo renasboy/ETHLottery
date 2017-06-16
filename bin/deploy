@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 geth=~/go-ethereum/build/bin/geth
 date=$(date +%s)
 deploy_file=bin/deploy_${date}.js
@@ -18,6 +17,6 @@ sed -e 's/OWNER_FEE/'$owner_fee'/' \
     -e 's/JACKPOT/'$jackpot'/' \
     -e 's/ABI/'$abi'/' \
     -e 's/CODE/'$code'/' \
-    -e 's/OWNER/'$owner'/' bin/deploy_contract.tpl.js > $deploy_file
+    -e 's/OWNER/'$owner'/' bin/deploy.tpl.js > $deploy_file
 
 $geth --testnet --datadir ~/eth-testnet js $deploy_file --unlock $owner
