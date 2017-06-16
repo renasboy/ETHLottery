@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. bin/compile
+
+sed -e 's/^var code.*/var code = "0x'$code'";/' \
+    -e 's/^var abi.*/var abi = '$abi';/' -i README.md
