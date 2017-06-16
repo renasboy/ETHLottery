@@ -74,7 +74,7 @@ contract ETHLottery {
     function lottery(bytes1 _char) isClosed isOwner {
         result = _char;
         address[] winners = bettings[result];
-        if (winners.length > 1) {
+        if (winners.length > 0) {
             uint256 credit = total / winners.length;
             for (uint256 i = 0; i < winners.length; i++) {
                 credits[winners[i]] = credit;
