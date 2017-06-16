@@ -1,4 +1,4 @@
-var owner = "OWNER"
+var owner = "OWNER";
 var fee = FEE;
 var jackpot = JACKPOT;
 var owner_fee = OWNER_FEE;
