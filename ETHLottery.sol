@@ -14,6 +14,7 @@ contract ETHLottery {
 
     event Total(uint256 total);
     event Result(bytes1 result);
+    event Open(bool open);
 
     function ETHLottery(uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
         owner = msg.sender;
@@ -21,6 +22,7 @@ contract ETHLottery {
         fee = _fee * 1000000000000000000;
         jackpot = _jackpot * 1000000000000000000;
         owner_fee = _owner_fee;
+        Open(open);
     }
 
     modifier isOwner() {
@@ -63,6 +65,7 @@ contract ETHLottery {
                 total += owner_fee_amount;
                 open = true;
             }
+            Open(open);
         }
         Total(total);
     }
