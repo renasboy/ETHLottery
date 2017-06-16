@@ -129,7 +129,7 @@ div span {
         var pass = document.getElementById('pass').value;
         var gas = document.getElementById('gas').value;
         web3.personal.unlockAccount(participant, pass);
-        ETHLottery.withdraw({ from : participant, gas: gas }), function (e, c) {
+        ETHLottery.withdraw({ from : participant, gas: gas }, function (e, c) {
             web3.personal.lockAccount(participant);
             if (e) {
                 document.getElementById('error').innerText = e.message;
@@ -138,7 +138,7 @@ div span {
             if (c) {
                 console.log(c);
             }
-        };
+        });
     }
 
 </script>
