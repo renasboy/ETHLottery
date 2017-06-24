@@ -1,6 +1,7 @@
 pragma solidity ^0.4.11;
 
 contract ETHLottery {
+    bytes32 public name = 'ETHLottery - Last 1 Byte Lottery';
     address public owner;
     bool public open;
     uint256 public jackpot;
