@@ -7,6 +7,8 @@ contract ETHLottery {
     uint256 public total;
     uint256 public fee;
     uint256 public owner_fee;
+    uint256 public result_block;
+    bytes32 public result_hash;
     bytes1 public result;
 
     mapping (bytes1 => address[]) bettings;
@@ -49,12 +51,23 @@ contract ETHLottery {
         require(credits[msg.sender] > 0);
         _;
     }
+
+    modifier hasResultHash() {
+        require(
+            block.number >= result_block &&
+            block.number <= result_block + 256 &&
+            block.blockhash(result_block) != result_hash
+            );
+        _;
+    }
     
     function play(bytes1 _char) payable isOpen isPaid {
         bettings[_char].push(msg.sender);
         total += msg.value;
         if (total >= jackpot) {
             open = false;
+            // block offset hardcoded to 10
+            result_block = block.number + 10;
             uint256 owner_fee_amount = (total * owner_fee) / 100;
             total -= owner_fee_amount;
             // this is the transaction which
@@ -64,15 +77,17 @@ contract ETHLottery {
             if (!owner.send(owner_fee_amount)) {
                 total += owner_fee_amount;
                 open = true;
+                result_block = 0;
             }
             Open(open);
         }
         Total(total);
     }
 
-    // block hash last char is passed to lottery
-    function lottery(bytes1 _char) isClosed isOwner {
-        result = _char;
+    function lottery() isClosed hasResultHash isOwner {
+        result_hash = block.blockhash(result_block);
+        // get last byte (31st) from block hash as result
+        result = result_hash[31];
         address[] winners = bettings[result];
         if (winners.length > 0) {
             uint256 credit = total / winners.length;

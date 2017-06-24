@@ -34,7 +34,7 @@ div span {
     <div id="error"></div>
     <div>PLAY FROM: <select id="participant"></select> <input type="password" id="pass" placeholder="password"></div>
     <div>GAS: <input id="gas" size="10" value="90000"></div>
-    <div>GUESS LAST BLOCK HASH CHAR: <input size="2" id="play" maxlength="1"> <input type="button" value="go lucky char, do your magic" onClick="play();"></div>
+    <div>GUESS LAST BLOCK HASH BYTE: 0x<input size="2" id="play" maxlength="2"> <input type="button" value="go lucky byte, do your magic..." onClick="play();"></div>
     <div>WITHDRAW: <input type="button" value="go get my ETHs now!" onClick="withdraw();"></div>
 
 
@@ -51,7 +51,7 @@ div span {
           var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     }
 
-    var abi = [{"constant":true,"inputs":[],"name":"owner_fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"destruct","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"lottery","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result","outputs":[{"name":"","type":"bytes1"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"jackpot","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"play","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"open","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"inputs":[{"name":"_fee","type":"uint256"},{"name":"_jackpot","type":"uint256"},{"name":"_owner_fee","type":"uint256"}],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"total","type":"uint256"}],"name":"Total","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"result","type":"bytes1"}],"name":"Result","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"open","type":"bool"}],"name":"Open","type":"event"}];
+    var abi = [{"constant":true,"inputs":[],"name":"owner_fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"destruct","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"total","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result_block","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result","outputs":[{"name":"","type":"bytes1"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"jackpot","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"lottery","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"play","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"result_hash","outputs":[{"name":"","type":"bytes32"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"open","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"inputs":[{"name":"_fee","type":"uint256"},{"name":"_jackpot","type":"uint256"},{"name":"_owner_fee","type":"uint256"}],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"total","type":"uint256"}],"name":"Total","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"result","type":"bytes1"}],"name":"Result","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"open","type":"bool"}],"name":"Open","type":"event"}];
 
     var address = "0x19e75b7760b1b8e708c085ab83ab7b62db126578";
  
@@ -66,7 +66,7 @@ div span {
 
     var resultEvent = ETHLottery.Result(function(error, result) {
         if (!error) {
-            document.getElementById('result').innerText = String.fromCharCode(result.args.result);
+            document.getElementById('result').innerText = result.args.result;
         }
     });
 
@@ -104,7 +104,7 @@ div span {
     });
 
     ETHLottery.result(function (e, c) {
-        document.getElementById('result').innerText = c == "0x00" ? 'N/A' : String.fromCharCode(c);
+        document.getElementById('result').innerText = c == "0x00" ? 'N/A' : c;
     });
     
     function play () {
@@ -113,8 +113,8 @@ div span {
         var pass = document.getElementById('pass').value;
         var gas = document.getElementById('gas').value;
         var guess = document.getElementById('play').value;
-        if (guess.length == 1) {
-            guess = "0x" + guess.charCodeAt(0).toString(16);
+        if (guess.length == 2 && guess.match(/[0-9a-f]{2}/)) {
+            guess = "0x" + guess;
             var fee = new BigNumber(document.getElementById('fee').innerText * 1000000000000000000);
             web3.personal.unlockAccount(participant, pass);
             ETHLottery.play(guess, { from : participant, value: fee, gas: gas }, function (e, c) {
