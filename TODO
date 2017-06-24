@@ -1,3 +1,9 @@
 - contract manager
 - char2, char3, char4
 - accumulate jackpot
+
+- service to transfer ether for users who wants to try out the lottrely.
+- 3 steps setup
+-- Install extension and get your 0x address
+-- Open e-lothery URL request some ethers to play
+-- Open the e-lothery app and start to have FUN!!!!
