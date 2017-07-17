@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#address=0xaa2179259baaf3229ef598306306bf6b8a38ec52
+#address=0x83e90b9bc5929d3403ecb621fc913f3d9a3d1060
+#address=0x8451220218f52fdcc4c3f06ef019ee82c58c37a5
+#address=0xd1498f1c4aaafcd1eaa1b6e3594a37c7fd7d0909
+#address=0xe1b5beac131cb9dd9f783f859939f1bdf8b5857b
+address=0xa55e4642e1630d6b49d6727b700dc15cac19fe72
+
+hex_address=$(echo $address | tr x 0)
+
+hex_list=($(echo $hex_address | fold -w 6))
+
+fill=""
+old_point_x=0
+old_point_y=0
+for hex in "${hex_list[@]}"; do
+    point_list=($(echo $hex | fold -w 2))
+    for point in  "${point_list[@]}"; do 
+	char_list=($(echo $point | fold -w 1))
+	point_x=${char_list[0]}
+	point_y=${char_list[1]}
+	old_point="$old_point_x,$old_point_y"
+
+	new_point="$old_point_x,$((16#0$point_y))"
+	cmd="-fill \#$hex -draw 'line $old_point $new_point' -rotate 90"
+	fill="$fill $(echo $_{1..4}"$cmd")"
+	old_point=$new_point
+
+	new_point="$((16#0$point_x)),$((16#0$point_y))"
+	cmd="-fill \#$hex -draw 'line $old_point $new_point' -rotate 90"
+	fill="$fill $(echo $_{1..4}"$cmd")"
+	old_point=$new_point
+
+	old_point_x=$((16#0$point_x))
+	old_point_y=$((16#0$point_y))
+    done
+done
+
+cmd="convert -size 16x16 xc:white $fill -scale 128x128 icons/$address.gif"
+
+eval "$cmd"
