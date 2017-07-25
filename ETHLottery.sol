@@ -88,7 +88,7 @@ contract ETHLottery {
     function manual_lottery(bytes32 _result_hash) isClosed isOwner {
         result_hash = _result_hash;
         result = result_hash[31];
-        address[] winners = bettings[result];
+        address[] storage winners = bettings[result];
         if (winners.length > 0) {
             uint256 credit = total / winners.length;
             for (uint256 i = 0; i < winners.length; i++) {
@@ -102,7 +102,7 @@ contract ETHLottery {
         result_hash = block.blockhash(result_block);
         // get last byte (31st) from block hash as result
         result = result_hash[31];
-        address[] winners = bettings[result];
+        address[] storage winners = bettings[result];
         if (winners.length > 0) {
             uint256 credit = total / winners.length;
             for (uint256 i = 0; i < winners.length; i++) {
