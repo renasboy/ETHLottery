@@ -85,6 +85,9 @@ contract ETHLottery {
         Total(total);
     }
 
+    // This method is only used for testing purposes
+    // When on production network, the lottery() method
+    // will be used instead and this one removed.
     function manual_lottery(bytes32 _result_hash) isClosed isOwner {
         result_hash = _result_hash;
         result = result_hash[31];
