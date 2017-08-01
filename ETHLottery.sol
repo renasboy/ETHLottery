@@ -22,8 +22,8 @@ contract ETHLottery {
     function ETHLottery(uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
         owner = msg.sender;
         open = true;
-        fee = _fee * 1000000000000000000;
-        jackpot = _jackpot * 1000000000000000000;
+        fee = _fee;
+        jackpot = _jackpot;
         owner_fee = _owner_fee;
         Open(open);
     }
@@ -123,6 +123,11 @@ contract ETHLottery {
             // transfer failed, return credit for withdraw
             credits[msg.sender] = credit;
         }
+    }
+
+
+    function accumulate(address contract) isClosed isOwner {
+        selfdestruct(contract);
     }
 
     function destruct() isClosed isOwner {
