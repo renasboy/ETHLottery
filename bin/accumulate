@@ -1,0 +1,26 @@
+#!/bin/bash
+
+usage () {
+    echo "Usage $0 LOTTERY NEW_LOTTERY"
+    exit 1
+}
+
+[[ -n "$1" && -n "$2" ]] || usage
+
+geth=/usr/src/go-ethereum/build/bin/geth
+date=$(date +%s)
+accumulate_file=managers/accumulate_${date}.js
+
+owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
+lottery="$1"
+new_lottery="$2"
+
+. bin/compile
+
+sed -e 's/LOTTERY/'$lottery'/' \
+    -e 's/NEW_LOTTERY/'$new_lottery'/' \
+    -e 's/OWNER/'$owner'/' \
+    -e 's/ABI/'$abi'/' bin/accumulate.tpl.js > $accumulate_file
+
+echo "ACCUMULATE COMMAND"
+echo $geth --testnet --datadir ~/eth-testnet js $accumulate_file --unlock $owner
