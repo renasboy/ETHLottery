@@ -17,8 +17,8 @@ new_lottery="$2"
 
 . bin/compile
 
-sed -e 's/LOTTERY/'$lottery'/' \
-    -e 's/NEW_LOTTERY/'$new_lottery'/' \
+sed -e 's/NEW_LOTTERY/'$new_lottery'/' \
+    -e 's/LOTTERY/'$lottery'/' \
     -e 's/OWNER/'$owner'/' \
     -e 's/ABI/'$abi'/' bin/accumulate.tpl.js > $accumulate_file
 

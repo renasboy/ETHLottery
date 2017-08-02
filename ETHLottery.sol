@@ -125,12 +125,15 @@ contract ETHLottery {
         }
     }
 
-
     function accumulate(address _lottery) isClosed isOwner {
         selfdestruct(_lottery);
     }
 
     function destruct() isClosed isOwner {
         selfdestruct(owner);
+    }
+    
+    function () payable {
+        total += msg.value;
     }
 }
