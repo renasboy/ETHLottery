@@ -1,6 +1,6 @@
 #!/bin/bash
 
-solc=~/solidity/build/solc/solc
+solc=/usr/src/solidity/build/solc/solc
 
 abi=$($solc --abi ETHLottery.sol | tail -1)
 echo $abi

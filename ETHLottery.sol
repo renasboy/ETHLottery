@@ -15,9 +15,9 @@ contract ETHLottery {
     mapping (bytes1 => address[]) bettings;
     mapping (address => uint256) credits;
 
-    event Total(uint256 total);
-    event Result(bytes1 result);
-    event Open(bool open);
+    event Total(uint256 _total);
+    event Result(bytes1 _result);
+    event Open(bool _open);
 
     function ETHLottery(uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
         owner = msg.sender;
@@ -126,8 +126,8 @@ contract ETHLottery {
     }
 
 
-    function accumulate(address contract) isClosed isOwner {
-        selfdestruct(contract);
+    function accumulate(address _lottery) isClosed isOwner {
+        selfdestruct(_lottery);
     }
 
     function destruct() isClosed isOwner {

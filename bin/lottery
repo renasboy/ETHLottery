@@ -7,7 +7,7 @@ usage () {
 
 [[ -n "$1" ]] || usage
 
-geth=~/go-ethereum/build/bin/geth
+geth=/usr/src/go-ethereum/build/bin/geth
 date=$(date +%s)
 lottery_file=managers/lottery_${date}.js
 
