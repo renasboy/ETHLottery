@@ -19,7 +19,7 @@ contract ETHLottery {
     mapping (bytes1 => address[]) bettings;
     mapping (address => uint256) credits;
 
-    event Balance(uint256 _total);
+    event Balance(uint256 _balance);
     event Result(bytes1 _result);
     event Open(bool _open);
 
