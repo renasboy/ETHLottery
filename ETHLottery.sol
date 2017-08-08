@@ -1,11 +1,15 @@
 pragma solidity ^0.4.11;
 
+contract ETHLotteryManagerInterface {
+    function register();
+}
+
 contract ETHLottery {
     bytes32 public name = 'ETHLottery - Last 1 Byte Lottery';
+    address public manager_address;
     address public owner;
     bool public open;
     uint256 public jackpot;
-    uint256 public total;
     uint256 public fee;
     uint256 public owner_fee;
     uint256 public result_block;
@@ -15,13 +19,14 @@ contract ETHLottery {
     mapping (bytes1 => address[]) bettings;
     mapping (address => uint256) credits;
 
-    event Total(uint256 _total);
+    event Balance(uint256 _total);
     event Result(bytes1 _result);
     event Open(bool _open);
 
-    function ETHLottery(uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
+    function ETHLottery(address _manager, uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
         owner = msg.sender;
         open = true;
+        manager_address = _manager;
         fee = _fee;
         jackpot = _jackpot;
         owner_fee = _owner_fee;
@@ -64,25 +69,22 @@ contract ETHLottery {
     
     function play(bytes1 _char) payable isOpen isPaid {
         bettings[_char].push(msg.sender);
-        total += msg.value;
-        if (total >= jackpot) {
+        if (this.balance >= jackpot) {
             open = false;
             // block offset hardcoded to 10
             result_block = block.number + 10;
-            uint256 owner_fee_amount = (total * owner_fee) / 100;
-            total -= owner_fee_amount;
+            uint256 owner_fee_amount = (this.balance * owner_fee) / 100;
             // this is the transaction which
             // will generate the block used
             // to count until the 10th in order
             // to get the lottery result.
             if (!owner.send(owner_fee_amount)) {
-                total += owner_fee_amount;
                 open = true;
                 result_block = 0;
             }
             Open(open);
         }
-        Total(total);
+        Balance(this.balance);
     }
 
     // This method is only used for testing purposes
@@ -93,7 +95,7 @@ contract ETHLottery {
         result = result_hash[31];
         address[] storage winners = bettings[result];
         if (winners.length > 0) {
-            uint256 credit = total / winners.length;
+            uint256 credit = this.balance / winners.length;
             for (uint256 i = 0; i < winners.length; i++) {
                 credits[winners[i]] = credit;
             }
@@ -107,7 +109,7 @@ contract ETHLottery {
         result = result_hash[31];
         address[] storage winners = bettings[result];
         if (winners.length > 0) {
-            uint256 credit = total / winners.length;
+            uint256 credit = this.balance / winners.length;
             for (uint256 i = 0; i < winners.length; i++) {
                 credits[winners[i]] = credit;
             }
@@ -125,15 +127,16 @@ contract ETHLottery {
         }
     }
 
+    function register() isOwner {
+        ETHLotteryManagerInterface manager = ETHLotteryManagerInterface(manager_address);
+        manager.register();
+    }
+
     function accumulate(address _lottery) isClosed isOwner {
         selfdestruct(_lottery);
     }
 
     function destruct() isClosed isOwner {
         selfdestruct(owner);
-    }
-    
-    function () payable {
-        total += msg.value;
     }
 }

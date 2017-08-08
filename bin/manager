@@ -1,5 +1,12 @@
 #!/bin/bash
 
-./bin/deploy 1 10 2
-./bin/lottery
-./bin/destruct
+manager=0x0000000000000
+
+if test -n "$1"; then
+    lottery=$1
+    ./bin/lottery $lottery
+    ./bin/destruct $lottery
+    exit
+fi
+
+./bin/deploy $manager 1000000000000000 1000000000000000000 2

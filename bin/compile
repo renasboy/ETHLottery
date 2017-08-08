@@ -1,9 +1,15 @@
 #!/bin/bash
 
 solc=/usr/src/solidity/build/solc/solc
+compile_dir=compiled
+contract=ETHLottery.sol
 
-abi=$($solc --abi ETHLottery.sol | tail -1)
-echo $abi
+mkdir -p $compile_dir
 
-code=$($solc --bin ETHLottery.sol | tail -1)
-echo $code
+$solc --abi -o $compile_dir --overwrite $contract 2>/dev/null
+abi=$(cat $compile_dir/ETHLottery.abi)
+#echo $abi
+
+$solc --bin -o $compile_dir --overwrite $contract 2>/dev/null
+code=$(cat $compile_dir/ETHLottery.bin)
+#echo $code
