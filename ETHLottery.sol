@@ -13,6 +13,7 @@ contract ETHLottery {
     uint256 public fee;
     uint256 public owner_fee;
     uint256 public result_block;
+    uint256 public winners_count;
     bytes32 public result_hash;
     bytes1 public result;
 
@@ -94,9 +95,10 @@ contract ETHLottery {
         result_hash = _result_hash;
         result = result_hash[31];
         address[] storage winners = bettings[result];
-        if (winners.length > 0) {
-            uint256 credit = this.balance / winners.length;
-            for (uint256 i = 0; i < winners.length; i++) {
+        winners_count = winners.length;
+        if (winners_count > 0) {
+            uint256 credit = this.balance / winners_count;
+            for (uint256 i = 0; i < winners_count; i++) {
                 credits[winners[i]] = credit;
             }
         }
@@ -108,9 +110,10 @@ contract ETHLottery {
         // get last byte (31st) from block hash as result
         result = result_hash[31];
         address[] storage winners = bettings[result];
-        if (winners.length > 0) {
-            uint256 credit = this.balance / winners.length;
-            for (uint256 i = 0; i < winners.length; i++) {
+        winners_count = winners.length;
+        if (winners_count > 0) {
+            uint256 credit = this.balance / winners_count;
+            for (uint256 i = 0; i < winners_count; i++) {
                 credits[winners[i]] = credit;
             }
         }
