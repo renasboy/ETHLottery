@@ -1,25 +1,27 @@
 #!/bin/bash
 
 usage () {
-    echo "Usage $0 FEE JACKPOT OWNER_FEE"
+    echo "Usage $0 MANAGER FEE JACKPOT OWNER_FEE"
     exit 1
 }
 
-[[ -n "$1" && -n "$2" && -n "$3" ]] || usage
+[[ -n "$1" && -n "$2" && -n "$3" && -n "$4" ]] || usage
 
 
 geth=/usr/src/go-ethereum/build/bin/geth
 date=$(date +%s)
 deploy_file=managers/deploy_${date}.js
 
-fee=$1
-jackpot=$2
-owner_fee=$3
+manager=$1
+fee=$2
+jackpot=$3
+owner_fee=$4
 owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
 
 . bin/compile
 
-sed -e 's/OWNER_FEE/'$owner_fee'/' \
+sed -e 's/MANAGER/'$manager'/' \
+    -e 's/OWNER_FEE/'$owner_fee'/' \
     -e 's/FEE/'$fee'/' \
     -e 's/JACKPOT/'$jackpot'/' \
     -e 's/ABI/'$abi'/' \

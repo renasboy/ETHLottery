@@ -25,7 +25,7 @@ contract ETHLotteryManager {
         _;
     }
 
-    function lotteries() returns (address[]) {
+    function lotteries() constant returns (address[]) {
         return _lotteries;
     }
 
