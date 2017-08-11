@@ -1,0 +1,24 @@
+#!/bin/bash
+
+usage () {
+    echo "Usage $0 LOTTERY"
+    exit 1
+}
+
+[[ -n "$1" ]] || usage
+
+geth=/usr/src/go-ethereum/build/bin/geth
+date=$(date +%s)
+register_file=managers/register_${date}.js
+
+owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
+lottery="$1"
+
+. bin/compile
+
+sed -e 's/LOTTERY/'$lottery'/' \
+    -e 's/OWNER/'$owner'/' \
+    -e 's/ABI/'$abi'/' bin/register.tpl.js > $register_file
+
+echo "REGISTER COMMAND"
+echo $geth --testnet --datadir ~/eth-testnet js $register_file --unlock $owner
