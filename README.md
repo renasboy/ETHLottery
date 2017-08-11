@@ -2,15 +2,20 @@
 
 The Ethereum Block Hash Lottery
 
-ETHLottery is a 100% fair lottery based on Ethereum blockchain technology, where the result is chosen based on a certain Ethereum Block Hash created in the future, therefore impossible to guess and temper with.
+ETHLottery is a 100% fair lottery based on Ethereum blockchain technology, where the result is chosen based on a certain Ethereum Block Hash created in the future, therefore impossible to precalculate and temper with.
 
-ETHLottery was designed to save as much gas as possible keeping the interactions to a minimum and a tidy contract code and logic.
+ETHLottery was designed to spare as much ether gas as possible keeping interactions to a minimum and a tidy contract code with simplistic logic.
 
 ## How it works
 
-Each round starts with an empty Ethereum smart contract, unless previous round has accumulated, during the round participants can make bets by sending the minimal fee and trying to guess which is the exact last byte of a certain Ethereum Block Hash generated only and **really only** after the lottery is closed.
+Each round starts with an Ethereum smart contract with empty balance, unless previous round has accumulated, during each round participants can make bets by sending the minimal fee and trying to guess which is the exact last byte of a certain Ethereum Block Hash generated only and **really only** after the lottery is closed.
 
 The Ethereum Block Hash is stored in hexadecimal format therefore the last byte are the exact last two characters of the hash. (Eg.: 0x00, 0xca, 0xf1, 0x3d). This gives 1 chance in 256 with possible byte values ranging from 0x00 to 0xff.
+
+Example Ethereum Block Hash:
+**0x5a801d8cf81a8ad942d5fa1b47f25b0b1507b7531b93f13ef9764e287bc51800**
+
+From the example above the result winning byte would be **0x00** as the block ends in 00.
 
 The Ethereum Block Hash used as lottery result belongs to the 10th block, after the block containing the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this action happens only once and only after the lottery is closed.
 
