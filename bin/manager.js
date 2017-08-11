@@ -23,13 +23,15 @@ var add_lottery = function (address) {
     }
     console.log('add ' + address);
     var lottery = web3.eth.contract(lottery_abi).at(address);
+    lottery_map[address] = lottery;
+
     lottery.Open(function(error, result) {
         if (error) {
             console.log(error);
         }
         if (result) {
-            console.log('Open');
-            if (result.args._open == false && result.address) {
+            console.log('Open' + result.address);
+            if (result.args._open == false) {
                 console.log('Closed ' + result.address);
                 console.log('waiting for 20 blocks ' + eth.blockNumber );
                 var interval = setInterval(function () {
@@ -48,14 +50,24 @@ var add_lottery = function (address) {
             console.log(error);
         }
         if (result) {
-            console.log('result ' + result.address);
+            console.log('Result ' + result.address);
             var lottery = lottery_map[result.address];
-            var accumulate = result.args._winners_count.toString(10) == '0' ? false : true;
+            var accumulate = result.args._winners_count().toString(10) == '0' ? false : true;
             console.log('accumulate value ' + accumulate);
             reproduce_lottery(lottery, accumulate);
         }
     });
-    lottery_map[address] = lottery;
+
+    lottery.open(function(error, result) {
+        if (!error && !result) {
+            lottery.result_hash(function(error, result) {
+                if (!error && result == '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                    console.log('need lottery ' + lottery.address);
+                    call_lottery(lottery.address);
+                }
+            });
+        }
+    });
 };
 
 var call_lottery = function (address) {
