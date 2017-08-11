@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# What to change
+OWNER="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
+MANAGER="0x450fa40f5537c34f1f5cfbb8329289e0a0299733"
+IPC="/path/to/the/file/geth.ipc"
+GETH="/path/to/the/file/geth"
+SOLC="/path/to/the/file/solc"
+COMPILE_DIR="compiled"
+SCRIPT_DIR="managers"
+
+# What not to change
+DATE=$(date +%s)
+SCRIPT=$SCRIPT_DIR/$(basename $0)_${DATE}.js

@@ -1,31 +1,25 @@
 #!/bin/bash
 
 usage () {
-    echo "Usage $0 MANAGER FEE JACKPOT OWNER_FEE"
+    echo "Usage $0 FEE JACKPOT OWNER_FEE"
     exit 1
 }
 
-[[ -n "$1" && -n "$2" && -n "$3" && -n "$4" ]] || usage
+[[ -n "$1" && -n "$2" && -n "$3" ]] || usage
 
+fee=$1
+jackpot=$2
+owner_fee=$3
 
-geth=/usr/src/go-ethereum/build/bin/geth
-date=$(date +%s)
-deploy_file=managers/deploy_${date}.js
-
-manager=$1
-fee=$2
-jackpot=$3
-owner_fee=$4
-owner="0xe581c6f0fae3bc426acfc660b36a7caf90f27987"
-
+. bin/conf
 . bin/compile
 
-sed -e 's/MANAGER/'$manager'/' \
+sed -e 's/MANAGER/'$MANAGER'/' \
     -e 's/OWNER_FEE/'$owner_fee'/' \
     -e 's/FEE/'$fee'/' \
     -e 's/JACKPOT/'$jackpot'/' \
-    -e 's/ABI/'$abi'/' \
-    -e 's/CODE/'$code'/' \
-    -e 's/OWNER/'$owner'/' bin/deploy.tpl.js > $deploy_file
+    -e 's/ABI/'$ABI'/' \
+    -e 's/CODE/'$CODE'/' \
+    -e 's/OWNER/'$OWNER'/' bin/deploy.tpl.js > $SCRIPT
 
-$geth --testnet --datadir ~/eth-testnet js $deploy_file --unlock $owner
+$GETH --jspath $PWD --exec "loadScript('$SCRIPT');" attach ipc:$IPC

@@ -1,15 +1,13 @@
 #!/bin/bash
 
-solc=/usr/src/solidity/build/solc/solc
-compile_dir=compiled
-contract=ETHLotteryManager.sol
+. bin/conf
 
-mkdir -p $compile_dir
+contract="ETHLotteryManager"
 
-$solc --abi -o $compile_dir --overwrite $contract
-abi=$(cat $compile_dir/ETHLotteryManager.abi)
-#echo $abi
+mkdir -p $COMPILE_DIR
 
-$solc --bin -o $compile_dir --overwrite $contract
-code=$(cat $compile_dir/ETHLotteryManager.bin)
-#echo $code
+$SOLC --abi -o $COMPILE_DIR --overwrite $contract.sol
+ABI=$(cat $COMPILE_DIR/$contract.abi)
+
+$SOLC --bin -o $COMPILE_DIR --overwrite $contract.sol
+CODE=$(cat $COMPILE_DIR/$contract.bin)
