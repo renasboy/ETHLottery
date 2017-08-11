@@ -30,13 +30,14 @@ var add_lottery = function (address) {
             console.log(error);
         }
         if (result) {
-            console.log('Open' + result.address);
+            console.log('Open ' + result.address);
             if (result.args._open == false) {
                 console.log('Closed ' + result.address);
-                console.log('waiting for 20 blocks ' + eth.blockNumber );
+                var wait_block = result.blockNumber + wait_blocks;
+                console.log('waiting for 20 blocks from ' + eth.blockNumber + ' until ' + wait_block);
                 var interval = setInterval(function () {
-                    console.log('waiting ' + eth.blockNumber);
-                    if (eth.blockNumber > (result.blockNumber + wait_blocks)) {
+                    console.log('waiting ' + eth.blockNumber + ' until ' + wait_block);
+                    if (eth.blockNumber > wait_block) {
                         console.log('finish waiting ' + eth.blockNumber);
                         clearInterval(interval);
                         call_lottery(result.address);
@@ -52,7 +53,8 @@ var add_lottery = function (address) {
         if (result) {
             console.log('Result ' + result.address);
             var lottery = lottery_map[result.address];
-            var accumulate = result.args._winners_count().toString(10) == '0' ? false : true;
+            console.log('winners count ' + result.args._winners_count);
+            var accumulate = result.args._winners_count == 0 ? true : false;
             console.log('accumulate value ' + accumulate);
             reproduce_lottery(lottery, accumulate);
         }
@@ -83,7 +85,7 @@ var call_lottery = function (address) {
             }
         }
     });
-}
+};
 
 var reproduce_lottery = function (lottery, accumulate) {
     var accumulated = accumulate ? eth.getBalance(lottery.address) : 0;
@@ -99,7 +101,7 @@ var reproduce_lottery = function (lottery, accumulate) {
         lottery.jackpot().toString(10),
         lottery.owner_fee().toString(10)
     );
-}
+};
 
 
 // deploy_lottery(1000000000000000, 1000000000000000, 2);
@@ -125,7 +127,7 @@ var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_address) {
             }
         }
     );
-}
+};
 
 var register_lottery = function (address) {
     var lottery = lottery_map[address];
@@ -140,7 +142,7 @@ var register_lottery = function (address) {
             }
         }
     });
-}
+};
 
 var accumulate_lottery = function (address, accumulate_address) {
     var lottery = lottery_map[accumulate_address];
@@ -156,7 +158,7 @@ var accumulate_lottery = function (address, accumulate_address) {
             }
         }
     });
-}
+};
 
 var register_event = manager_contract.Register(function (error, result) {
     if (error) {
