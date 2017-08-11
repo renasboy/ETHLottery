@@ -10,21 +10,22 @@ ETHLottery was designed to save as much gas as possible keeping the interactions
 
 Each round starts with an empty Ethereum smart contract, unless previous round has accumulated, during the round participants can make bets by sending the minimal fee and trying to guess which is the exact last byte of a certain Ethereum Block Hash generated only and **really only** after the lottery is closed.
 
-The block hash is stored in hexadecimal therefore the last byte are the exact last two characters of the hash. (Eg.: 0x00, 0xca, 0xf1, 0x3d)
+The Ethereum Block Hash is stored in hexadecimal format therefore the last byte are the exact last two characters of the hash. (Eg.: 0x00, 0xca, 0xf1, 0x3d). This gives 1 chance in 256 with possible bytes values ranging from 0x00 to 0xff.
 
 The Ethereum Block Hash used as lottery result belongs to the 10th block after the block containing the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this happens only once and only when the lottery is closed.
 
-The lottery closes after the contract balance which holds the prize reaches the value of the jackpot.
+The lottery closes after the contract balance which holds the prize, reaches the value of the jackpot.
 
 The lottery fee, the owner fee and the jackpot are values set when the contract is created and are 100% public and immutable in the blockchain.
 
-In case there are not winning bets with good guess of the last byte, the lottery prize accumulates to next lottery round.
+In case there are no winning bets with exact last byte guess, the lottery prize accumulates to next lottery round.
 
-## How to play with geth on CLI
-
-To send a bet, create a transaction to the contract address calling the function play() with your guess and the payment for the minimal fee.
+## How to play with geth console on CLI
 
 ### Preparations
+
+Before sending a bet, make the preparations by creating the lottery instance pointing to the ABI and already deployed contract address.
+
 ```shell
 // set the ETHLottery contract ABI
 var abi = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"bytes32"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner_fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"manager_address","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"register","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"destruct","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"withdraw","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result_block","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_result_hash","type":"bytes32"}],"name":"manual_lottery","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"result","outputs":[{"name":"","type":"bytes1"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"jackpot","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_lottery","type":"address"}],"name":"accumulate","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"lottery","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_char","type":"bytes1"}],"name":"play","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"result_hash","outputs":[{"name":"","type":"bytes32"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"winners_count","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"open","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"inputs":[{"name":"_manager","type":"address"},{"name":"_fee","type":"uint256"},{"name":"_jackpot","type":"uint256"},{"name":"_owner_fee","type":"uint256"}],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_balance","type":"uint256"}],"name":"Balance","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_result","type":"bytes1"}],"name":"Result","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_open","type":"bool"}],"name":"Open","type":"event"}];
@@ -39,38 +40,43 @@ var participant = "0xa2a069c92c8f41e8433adf1609e335af035eb17b";
 var ETHLottery = eth.contract(abi).at(address);
 ```
 
-### Public methods (read only)
+### Public lottery methods (read-only = FREE)
+
+Its always possible to see the current lottery status by calling the read-only methods.
 
 ```shell
 // See lottery name
-ETHLottery.name()
+ETHLottery.name();
 
 // See lottery status, open (true/false) 
-ETHLottery.open()
+ETHLottery.open();
 
-// See jackpot amount 
-ETHLottery.jackpot()
+// See jackpot amount in WEI 
+ETHLottery.jackpot();
 
-// See betting minimum fee amount
-ETHLottery.fee()
+// See betting minimum fee amount in WEI
+ETHLottery.fee();
 
-// See owner fee amount in percentage of total
-ETHLottery.owner_fee()
+// See owner fee amount in percentage of balance
+ETHLottery.owner_fee();
 
-// See block number which will contain winner hash
-ETHLottery.result_block()
+// See block number which will contain winner hash, only when open=false
+ETHLottery.result_block();
 
-// See block hash that makes the result
-ETHLottery.result_hash()
+// See block hash that makes the result, only when open=false
+ETHLottery.result_hash();
 
 // See lottery result, only when open=false
-ETHLottery.result()
+ETHLottery.result();
 
-// See number of winners after lottery is closed with result
-ETHLottery.winners_count()
+// See number of winners, only when open=false and result is available
+ETHLottery.winners_count();
 ```
 
 ### Betting / Playing
+
+To send a bet, create a transaction to the contract address calling the function play() with your guess and the payment for the minimal fee.
+
 ```shell
 // set the amount to pay the minimum fee to 0.001 ETH
 var amount = web3.toWei(1000000000000000, "ether");
