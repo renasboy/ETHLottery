@@ -193,4 +193,6 @@ Follow the instructions from the README page on how to install the official ETHL
 
 There is also a [live demo](https://lifelottery.github.io/) currently running against the ropsten test network
 
-Read the step by step manual on how to play using the official ETHLottery client.
+Demo requires metamask installed on latest version of google chrome browser.
+
+There is a step by step manual on how to play using the official ETHLottery client.
