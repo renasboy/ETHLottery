@@ -15,7 +15,7 @@ The Ethereum Block Hash is stored in hexadecimal format therefore the last byte 
 Example Ethereum Block Hash:
 **0x5a801d8cf81a8ad942d5fa1b47f25b0b1507b7531b93f13ef9764e287bc51800**
 
-From the example above the result winning byte would be **0x00** as the block ends in 00.
+From the example above the winning result byte would be **0x00** as the hash ends in 00.
 
 The Ethereum Block Hash used as lottery result belongs to the 10th block, after the block containing the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this action happens only once and only after the lottery is closed.
 
@@ -23,9 +23,11 @@ The lottery closes exactly when the contract balance which holds the prize, reac
 
 The lottery fee, the owner fee and the jackpot are values set when the contract is created and are 100% public and immutable in the blockchain.
 
-In case there are **no** winning bets with the exact last byte guess, the lottery prize accumulates to next lottery round.
+In case there are **no** winning bets with the exact last byte guess, the lottery jackpot prize accumulates to next lottery round.
 
 The lottery prize jackpot is divided equally among all winning participants.
+
+All lotteries have owner fee set during lottery creation which is a percentage of the jackpot.
 
 ## How to play with geth console on CLI
 
