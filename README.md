@@ -90,8 +90,8 @@ To send a bet, create a transaction to the contract address by calling the funct
 // set the bet guess to a byte represented in hexadecimal (from 0x00 to 0xff)
 var guess = '0x3d';
 
-// set the amount to the minimum fee (Eg. 0.001 ETH)
-var amount = web3.toWei(1000000000000000, "ether");
+// set the amount to the minimum fee from contract value
+var amount = ETHLottery.fee().toString(10);
 
 // unlock the participant account / wallet
 web3.personal.unlockAccount(participant, "YOUR_VERY_SECRET_PASSWORD");
@@ -101,6 +101,12 @@ ETHLottery.play(guess, {from: participant, value: amount});
 
 // make sure you lock the account again
 web3.personal.lockAccount(participant);
+
+// send more bets
+ETHLottery.play('0xbc', {from: participant, value: amount});
+ETHLottery.play('0xca', {from: participant, value: amount});
+ETHLottery.play('0x78', {from: participant, value: amount});
+ETHLottery.play('0xf1', {from: participant, value: amount});
 ```
 
 ### Withdraw prize
