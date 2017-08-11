@@ -79,10 +79,8 @@ var call_lottery = function (address) {
             console.log(error);
         }
         if (result) {
-            console.log('lottery tx ' + result.transactionHash);
-            if (result.address) {
-                console.log('lottery ' + result.address);
-            }
+            console.log('lottery tx ' + result);
+            console.log('lottery ' + lottery.address);
         }
     });
 };
@@ -99,13 +97,19 @@ var reproduce_lottery = function (lottery, accumulate) {
     deploy_lottery(
         lottery.fee().toString(10),
         lottery.jackpot().toString(10),
-        lottery.owner_fee().toString(10)
+        lottery.owner_fee().toString(10),
+        null
     );
 };
 
 
 // deploy_lottery(1000000000000000, 1000000000000000, 2);
 var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_address) {
+    console.log('Deploy')
+    console.log('Fee ' + fee);
+    console.log('Jackpot ' + jackpot);
+    console.log('Owner fee ' + owner_fee);
+    console.log('Accumulate from ' + accumulate_address);
     web3.eth.contract(lottery_abi).new(manager_address, fee, jackpot, owner_fee,
         { from: owner, data: code, gas: gas },
         function (error, result) {
@@ -136,10 +140,8 @@ var register_lottery = function (address) {
             console.log(error);
         }
         if (result) {
-            console.log('registered tx ' + result.transactionHash);
-            if (result.address) {
-                console.log('registered ' + result.address);
-            }
+            console.log('registered tx ' + result);
+            console.log('registered ' + lottery.address);
         }
     });
 };
@@ -151,11 +153,9 @@ var accumulate_lottery = function (address, accumulate_address) {
             console.log(error);
         }
         if (result) {
-            console.log('accumulate tx ' + result.transactionHash);
-            if (result.address) {
-                console.log('accumulated' + result.address);
-                register_lottery(result.address);
-            }
+            console.log('accumulate tx ' + result);
+            console.log('accumulated ' + lottery.address);
+            register_lottery(address);
         }
     });
 };
