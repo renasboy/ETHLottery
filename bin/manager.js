@@ -16,13 +16,20 @@ var manager_address = "0x79a48215e2fafbaa36baba048864c95a6ab9eb99";
 var manager_contract = web3.eth.contract(manager_abi).at(manager_address);
 
 var lottery_map = {};
+var intervals = {};
 
 var add_lottery = function (address) {
     if (lottery_map[address]) {
         return;
     }
-    console.log('add ' + address);
     var lottery = web3.eth.contract(lottery_abi).at(address);
+
+    if (!lottery.open() && lottery.result_hash() != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+        return;
+    }
+
+    console.log('add ' + address);
+
     lottery_map[address] = lottery;
 
     lottery.Open(function(error, result) {
@@ -35,11 +42,11 @@ var add_lottery = function (address) {
                 console.log('Closed ' + result.address);
                 var wait_block = result.blockNumber + wait_blocks;
                 console.log('waiting for 20 blocks from ' + eth.blockNumber + ' until ' + wait_block);
-                var interval = setInterval(function () {
+                intervals[result.address] = setInterval(function () {
                     console.log('waiting ' + eth.blockNumber + ' until ' + wait_block);
                     if (eth.blockNumber > wait_block) {
                         console.log('finish waiting ' + eth.blockNumber);
-                        clearInterval(interval);
+                        clearInterval(intervals[result.address]);
                         call_lottery(result.address);
                     }
                 }, 30000);
@@ -60,12 +67,20 @@ var add_lottery = function (address) {
         }
     });
 
-    lottery.open(function(error, result) {
-        if (!error && !result) {
-            lottery.result_hash(function(error, result) {
-                if (!error && result == '0x0000000000000000000000000000000000000000000000000000000000000000') {
-                    console.log('need lottery ' + lottery.address);
-                    call_lottery(lottery.address);
+    if (!lottery.open() && lottery.result_hash() == '0x0000000000000000000000000000000000000000000000000000000000000000') {
+        console.log('need lottery ' + lottery.address);
+        call_lottery(lottery.address);
+    }
+};
+
+var player = function () {
+    lottery_address_list.forEach(function(lottery_address) {
+        var lottery = lottery_map[lottery_address];
+        if (lottery && lottery.open()) {
+            var guess = Math.floor(Math.random() * 256).toString(16);
+            lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
+                if (!error) {
+                    console.log('play ' + guess);
                 }
             });
         }
@@ -167,6 +182,7 @@ var register_event = manager_contract.Register(function (error, result) {
     if (result) {
         console.log('Register ' + result.address);
         add_lottery(result.args.lottery);
+        lottery_address_list.push(result.args.lottery);
     }
 });
 
