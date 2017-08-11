@@ -8,13 +8,17 @@ ETHLottery was designed to save as much gas as possible keeping the interactions
 
 ## How it works
 
-Each round starts with an empty Ethereum smart contract, where participants can make bets by sending a minimal fee and trying to guess which is the exact last byte of a certain Ethereum Block Hash generated only and really *only* after the lottery is closed.
+Each round starts with an empty Ethereum smart contract, unless previous round has accumulated, during the round participants can make bets by sending the minimal fee and trying to guess which is the exact last byte of a certain Ethereum Block Hash generated only and **really only** after the lottery is closed.
+
+The block hash is stored in hexadecimal therefore the last byte are the exact last two characters of the hash. (Eg.: 0x00, 0xca, 0xf1, 0x3d)
 
 The Ethereum Block Hash used as lottery result belongs to the 10th block after the block containing the only transaction made from the ETHLottery smart contract to the lottery owner's Ethereum wallet with the payment of the owner fee, this happens only once and only when the lottery is closed.
 
-The lottery closes after the prize reaches the jackpot.
+The lottery closes after the contract balance which holds the prize reaches the value of the jackpot.
 
 The lottery fee, the owner fee and the jackpot are values set when the contract is created and are 100% public and immutable in the blockchain.
+
+In case there are not winning bets with good guess of the last byte, the lottery prize accumulates to next lottery round.
 
 ## How to play with geth on CLI
 
@@ -38,11 +42,11 @@ var ETHLottery = eth.contract(abi).at(address);
 ### Public methods (read only)
 
 ```shell
+// See lottery name
+ETHLottery.name()
+
 // See lottery status, open (true/false) 
 ETHLottery.open()
-
-// See total prize accumulate 
-ETHLottery.total()
 
 // See jackpot amount 
 ETHLottery.jackpot()
@@ -53,14 +57,23 @@ ETHLottery.fee()
 // See owner fee amount in percentage of total
 ETHLottery.owner_fee()
 
+// See block number which will contain winner hash
+ETHLottery.result_block()
+
+// See block hash that makes the result
+ETHLottery.result_hash()
+
 // See lottery result, only when open=false
 ETHLottery.result()
+
+// See number of winners after lottery is closed with result
+ETHLottery.winners_count()
 ```
 
 ### Betting / Playing
 ```shell
-// set the amount to pay the minimum fee to 1 ETH
-var amount = web3.toWei(1, "ether");
+// set the amount to pay the minimum fee to 0.001 ETH
+var amount = web3.toWei(1000000000000000, "ether");
 
 // unlock the participant account / wallet
 web3.personal.unlockAccount(participant, "YOUR_VERY_SECRET_PASSWORD");
@@ -86,6 +99,10 @@ web3.personal.lockAccount(participant);
 
 ## How to play with js GUI
 
+It is also possible to play using the javascript GUI in the file index.html 
+
+If you decide to test the index.html make sure to update ABI and run your own Ethereum node to attach.
+
 ### Install dependency
 ```shell
 npm install web3 bignumber
@@ -94,12 +111,18 @@ npm install web3 bignumber
 ## How to run your own ETHLottery
 
 ### Create a new lottery
-```shell
-// Set betting minimum fee amount to 1 ETH
-var fee = 1;
 
-// Set jackpot amount to 10 ETH
-var jackpot = 10;
+To start create a lottery deploying the contract to Ethereum blockchain network.
+
+```shell
+// Set the manager contract address
+var manager_address = '0x4b8ed55eac499816532a5388373bfff0398c8203';
+
+// Set betting minimum fee amount to 0.001 ETH
+var fee = 1000000000000000;
+
+// Set jackpot amount to 1 ETH
+var jackpot = 1000000000000000000;
 
 // Set owner fee amount in percentage of total
 var owner_fee = 2;
@@ -120,7 +143,7 @@ web3.personal.unlockAccount(owner, "YOUR_VERY_SECRET_PASSWORD");
 
 // create contract
 var contract = web3.eth.contract(abi);
-var ETHLottery = contract.new(fee, jackpot, owner_fee, { from: owner, data: code, gas: 1000000 });
+var ETHLottery = contract.new(manager_address, fee, jackpot, owner_fee, { from: owner, data: code, gas: 1000000 });
 
 // Make sure you lock the owner account
 web3.personal.lockAccount(owner);
@@ -128,9 +151,11 @@ web3.personal.lockAccount(owner);
 
 ### Send the result and find out the winners 
 
-```shell
-// After the lottery closes you can send the 10th block hash via lottery
+After lottery is closed, by contract balance hitting the jackpot, it is possible to run the lottery to know the result.
 
+This action need to be performed after 10 blocks have passed from the lottery close block.
+
+```shell
 // Unlock the owner account
 web3.personal.unlockAccount(owner, "YOUR_VERY_SECRET_PASSWORD");
 
