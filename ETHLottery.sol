@@ -21,7 +21,7 @@ contract ETHLottery {
     mapping (address => uint256) credits;
 
     event Balance(uint256 _balance);
-    event Result(bytes1 _result);
+    event Result(bytes1 _result, uint256 _winners_count);
     event Open(bool _open);
 
     function ETHLottery(address _manager, uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
@@ -102,7 +102,7 @@ contract ETHLottery {
                 credits[winners[i]] = credit;
             }
         }
-        Result(result);
+        Result(result, winners_count);
     }
 
     function lottery() isClosed hasResultHash isOwner {
@@ -117,7 +117,7 @@ contract ETHLottery {
                 credits[winners[i]] = credit;
             }
         }
-        Result(result);
+        Result(result, winners_count);
     }
 
     function withdraw() isClosed hasPrize {
