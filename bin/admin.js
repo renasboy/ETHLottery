@@ -34,7 +34,7 @@ var add_lottery = function (address) {
 
     lottery_map[address] = lottery;
 
-    lottery.Open(function(error, result) {
+    var open_event = lottery.Open(function(error, result) {
         if (error) {
             console.log(error);
         }
@@ -52,10 +52,11 @@ var add_lottery = function (address) {
                         call_lottery(result.address);
                     }
                 }, 30000);
+                open_event.stopWatching();
             }
         }
     });
-    lottery.Result(function(error, result) {
+    var result_event = lottery.Result(function(error, result) {
         if (error) {
             console.log(error);
         }
@@ -63,6 +64,7 @@ var add_lottery = function (address) {
             console.log('Result ' + result.args._result + ' for ' + result.address);
             var lottery = lottery_map[result.address];
             duplicate_lottery(lottery);
+            result_event.stopWatching();
         }
     });
 
@@ -80,13 +82,14 @@ var player = function () {
         var lottery = lottery_map[address];
         if (lottery.open() == true) {
             var guess = Math.floor(Math.random() * 256).toString(16);
+            console.log('play ' + guess + ' on ' + lottery.address);
             admin.sleepBlocks(1);
             lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
                 if (error) {
                     console.log(error);
                 }
                 if (result) {
-                    console.log('play ' + guess);
+                    console.log('played ' + guess + ' on ' + lottery.address);
                 }
             });
             admin.sleepBlocks(1);
@@ -159,8 +162,10 @@ var duplicate_lottery = function (lottery) {
     );
 };
 
+var deploy_first = function () {
+    deploy_lottery(1000000000000000, 1000000000000000, 2);
+}
 
-// deploy_lottery(1000000000000000, 1000000000000000, 2);
 // lottery_map['0x272f95692b79e72fba4beeb4275032bda39a0e4e'].play('0xbc', { from: owner, gas: gas, value: lottery_map['0x272f95692b79e72fba4beeb4275032bda39a0e4e'].fee().toString(10) });
 var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_address) {
     console.log('Deploy')
@@ -236,3 +241,11 @@ var lottery_address_list = manager_contract.lotteries();
 lottery_address_list.forEach(function(lottery_address) {
     add_lottery(lottery_address);
 });
+
+
+console.log('_________________________ ___   .____           __    __                       ');
+console.log('\\_   _____/\\__    ___/   |   \\  |    |    _____/  |__/  |_  ___________ ___.__.');
+console.log(' |    __)_   |    | /    ~    \\ |    |   /  _ \\   __\\   __\\/ __ \\_  __ <   |  |');
+console.log(' |        \\  |    | \\    Y    / |    |__(  <_> )  |  |  | \\  ___/|  | \\/\\___  |');
+console.log('/_______  /  |____|  \\___|_  /  |_______ \\____/|__|  |__|  \\___  >__|   / ____|');
+console.log('        \\/                 \\/           \\/                     \\/       \\/     ');
