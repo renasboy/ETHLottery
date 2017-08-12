@@ -13,7 +13,7 @@ var lost_block = 250;
 
 var owner = "0xe581c6f0fae3bc426acfc660b36a7caf90f27987";
 
-var manager_address = "0x79a48215e2fafbaa36baba048864c95a6ab9eb99";
+var manager_address = "0xed40fb6904ea6791721c2a45e15a8062f6b2875b";
 
 var manager_contract = web3.eth.contract(manager_abi).at(manager_address);
 
@@ -43,11 +43,11 @@ var add_lottery = function (address) {
             if (result.args._open == false) {
                 console.log('Closed ' + result.address);
                 var wait_block = result.blockNumber + wait_blocks;
-                console.log('waiting for 20 blocks from ' + eth.blockNumber + ' until ' + wait_block);
+                console.log('waiting for ' + wait_blocks + ' blocks from ' + eth.blockNumber + ' until ' + wait_block + ' for ' + result.address);
                 intervals[result.address] = setInterval(function () {
-                    console.log('waiting ' + eth.blockNumber + ' until ' + wait_block);
+                    console.log('waiting ' + eth.blockNumber + ' until ' + wait_block + ' for ' + result.address);
                     if (eth.blockNumber > wait_block) {
-                        console.log('finish waiting ' + eth.blockNumber);
+                        console.log('finish waiting ' + eth.blockNumber + ' for ' + result.address);
                         clearInterval(intervals[result.address]);
                         call_lottery(result.address);
                     }
@@ -60,10 +60,9 @@ var add_lottery = function (address) {
             console.log(error);
         }
         if (result) {
-            console.log('Result ' + result.address);
+            console.log('Result ' + result.args._result + ' for ' + result.address);
             var lottery = lottery_map[result.address];
             duplicate_lottery(lottery);
-            delete lottery_map[result.address];
         }
     });
 
@@ -81,6 +80,7 @@ var player = function () {
         var lottery = lottery_map[address];
         if (lottery.open() == true) {
             var guess = Math.floor(Math.random() * 256).toString(16);
+            admin.sleepBlocks(5);
             lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
                 if (error) {
                     console.log(error);
@@ -89,6 +89,7 @@ var player = function () {
                     console.log('play ' + guess);
                 }
             });
+            admin.sleepBlocks(5);
         }
     }
 };
@@ -101,6 +102,7 @@ var manual_lottery = function () {
             eth.blockNumber > lottery.result_block().plus(lost_block)) {
             var hash = eth.getBlock(lottery.result_block()).hash;
             if (hash) {
+                admin.sleepBlocks(5);
                 lottery.manual_lottery(hash, { from: owner, gas: gas }, function (error, result) {
                     if (error) {
                         console.log(error);
@@ -110,7 +112,7 @@ var manual_lottery = function () {
                         console.log('manual lottery ' + lottery.address);
                     }
                 });
-                admin.sleepBlocks(1);
+                admin.sleepBlocks(5);
             }
         }
     }
@@ -118,6 +120,7 @@ var manual_lottery = function () {
 
 var call_lottery = function (address) {
     var lottery = lottery_map[address];
+    admin.sleepBlocks(5);
     lottery.lottery({ from: owner, gas: gas }, function (error, result) {
         if (error) {
             console.log(error);
@@ -127,7 +130,7 @@ var call_lottery = function (address) {
             console.log('lottery ' + lottery.address);
         }
     });
-    admin.sleepBlocks(1);
+    admin.sleepBlocks(5);
 };
 
 var duplicate_lottery = function (lottery) {
@@ -147,7 +150,7 @@ var duplicate_lottery = function (lottery) {
         lottery.owner_fee().toString(10),
         accumulate_address
     );
-    admin.sleepBlocks(1);
+    admin.sleepBlocks(5);
     deploy_lottery(
         lottery.fee().toString(10),
         lottery.jackpot().toString(10),
@@ -158,12 +161,14 @@ var duplicate_lottery = function (lottery) {
 
 
 // deploy_lottery(1000000000000000, 1000000000000000, 2);
+// lottery_map['0x272f95692b79e72fba4beeb4275032bda39a0e4e'].play('0xbc', { from: owner, gas: gas, value: lottery_map['0x272f95692b79e72fba4beeb4275032bda39a0e4e'].fee().toString(10) });
 var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_address) {
     console.log('Deploy')
     console.log('fee ' + fee);
     console.log('jackpot ' + jackpot);
     console.log('owner fee ' + owner_fee);
     console.log('accumulate from ' + accumulate_address);
+    admin.sleepBlocks(5);
     web3.eth.contract(lottery_abi).new(manager_address, fee, jackpot, owner_fee,
         { from: owner, data: code, gas: gas },
         function (error, result) {
@@ -185,11 +190,11 @@ var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_address) {
             }
         }
     );
-    admin.sleepBlocks(1);
 };
 
 var register_lottery = function (address) {
     var lottery = lottery_map[address];
+    admin.sleepBlocks(5);
     lottery.register({ from: owner, gas: gas }, function (error, result) {
         if (error) {
             console.log(error);
@@ -199,22 +204,21 @@ var register_lottery = function (address) {
             console.log('registered ' + lottery.address);
         }
     });
-    admin.sleepBlocks(1);
 };
 
 var accumulate_lottery = function (address, accumulate_address) {
     var lottery = lottery_map[accumulate_address];
+    admin.sleepBlocks(5);
     lottery.accumulate(address, { from: owner, gas: gas }, function (error, result) {
         if (error) {
             console.log(error);
         }
         if (result) {
             console.log('accumulate tx ' + result);
-            console.log('accumulated ' + lottery.address);
+            console.log('accumulated from ' + lottery.address + ' to ' + address);
             register_lottery(address);
         }
     });
-    admin.sleepBlocks(1);
 };
 
 var register_event = manager_contract.Register(function (error, result) {
@@ -222,7 +226,7 @@ var register_event = manager_contract.Register(function (error, result) {
         console.log(error);
     }
     if (result) {
-        console.log('Register ' + result.address);
+        console.log('Register ' + result.args.lottery +  ' into manager ' + result.address);
         add_lottery(result.args.lottery);
     }
 });
