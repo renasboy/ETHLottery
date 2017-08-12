@@ -80,7 +80,7 @@ var player = function () {
         var lottery = lottery_map[address];
         if (lottery.open() == true) {
             var guess = Math.floor(Math.random() * 256).toString(16);
-            admin.sleepBlocks(5);
+            admin.sleepBlocks(1);
             lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
                 if (error) {
                     console.log(error);
@@ -89,7 +89,7 @@ var player = function () {
                     console.log('play ' + guess);
                 }
             });
-            admin.sleepBlocks(5);
+            admin.sleepBlocks(1);
         }
     }
 };
