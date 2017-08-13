@@ -1,40 +1,35 @@
 pragma solidity ^0.4.11;
 
-contract ETHLotteryInterface {
-    address public owner;
-}
-
 contract ETHLotteryManager {
     address public owner;
-    address[] _lotteries;
+    address[] lottery_list;
 
-    event Register(address lottery);
+    event Register(address _lottery);
+    event Destroy();
 
     function ETHLotteryManager() {
         owner = msg.sender;
     }
 
     modifier isOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    modifier isOwnerLottery() {
-        ETHLotteryInterface lottery = ETHLotteryInterface(msg.sender);
-        require(lottery.owner() == owner);
+        // used tx.origin on purpose instead of
+        // msg.sender, as we want to get the original
+        // starter of the transaction to be owner
+        require(tx.origin == owner);
         _;
     }
 
     function lotteries() constant returns (address[]) {
-        return _lotteries;
+        return lottery_list;
     }
 
-    function register() isOwnerLottery {
-        _lotteries.push(msg.sender);
+    function register() isOwner {
+        lottery_list.push(msg.sender);
         Register(msg.sender);
     }
 
     function destruct() isOwner {
+        Destroy();
         selfdestruct(owner);
     }
 }

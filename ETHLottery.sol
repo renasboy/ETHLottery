@@ -37,6 +37,8 @@ contract ETHLottery {
         fee = _fee;
         jackpot = _jackpot;
         owner_fee = _owner_fee;
+        ETHLotteryManagerInterface manager = ETHLotteryManagerInterface(manager_address);
+        manager.register();
         Open(open);
     }
 
@@ -74,30 +76,30 @@ contract ETHLottery {
         _;
     }
     
-    function play(bytes1 _byte) payable isOpen isPaid {
+    function play(bytes1 _byte) payable isOpen isPaid returns (bool) {
         bettings[_byte].push(msg.sender);
         if (this.balance >= jackpot) {
-            open = false;
-            // block offset hardcoded to 10
-            result_block = block.number + 10;
             uint256 owner_fee_amount = (this.balance * owner_fee) / 100;
             // this is the transaction which
             // will generate the block used
             // to count until the 10th in order
             // to get the lottery result.
             if (!owner.send(owner_fee_amount)) {
-                open = true;
-                result_block = 0;
+                return false;
             }
+            open = false;
+            // block offset hardcoded to 10
+            result_block = block.number + 10;
             Open(open);
         }
         Balance(this.balance);
         Play(msg.sender, _byte, now);
+        return true;
     }
 
-    // This method is only used for testing purposes
-    // When on production network, the lottery() method
-    // will be used instead and this one removed.
+    // This method is only used if we miss the 256th block
+    // containing the result hash, lottery() should be used instead
+    // this method as this is duplicated from lottery()
     function manual_lottery(bytes32 _result_hash) isClosed isOwner {
         result_hash = _result_hash;
         result = result_hash[31];
@@ -127,20 +129,18 @@ contract ETHLottery {
         Result(result);
     }
 
-    function withdraw() isClosed hasPrize {
+    function withdraw() isClosed hasPrize returns (bool) {
         uint256 credit = credits[msg.sender];
         // zero credit before send preventing re-entrancy
+        // as msg.sender can be a contract and call us back
         credits[msg.sender] = 0;
         if (!msg.sender.send(credit)) {
             // transfer failed, return credit for withdraw
             credits[msg.sender] = credit;
+            return false;
         }
         Withdraw(msg.sender, credit, now);
-    }
-
-    function register() isOwner {
-        ETHLotteryManagerInterface manager = ETHLotteryManagerInterface(manager_address);
-        manager.register();
+        return true;
     }
 
     function accumulate(address _lottery) isClosed isOwner {

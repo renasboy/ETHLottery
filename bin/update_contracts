@@ -1,0 +1,14 @@
+#!/bin/bash
+
+. bin/compile
+
+sed -e 's/^var code.*/var code = "0x'$CODE'";/' \
+    -e 's/^var abi.*/var abi = '$ABI';/' -i README.md
+
+sed -e 's/^var lottery_code.*/var lottery_code = "0x'$CODE'";/' \
+    -e 's/^var lottery_abi.*/var lottery_abi = '$ABI';/' -i bin/conf.js
+
+. bin/compile_manager
+
+sed -e 's/^var manager_code.*/var manager_code = "0x'$CODE'";/' \
+    -e 's/^var manager_abi.*/var manager_abi = '$ABI';/' -i bin/conf.js
