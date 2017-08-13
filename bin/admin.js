@@ -8,7 +8,7 @@ var lost_block = 250;
 
 var owner = "0xe581c6f0fae3bc426acfc660b36a7caf90f27987";
 
-var manager_address = "0xed40fb6904ea6791721c2a45e15a8062f6b2875b";
+var manager_address = "0x88259b4a9d95ca2b237381047a6751e64ba06dd9";
 
 var manager_contract = web3.eth.contract(manager_abi).at(manager_address);
 
@@ -37,6 +37,8 @@ var add_lottery = function (address) {
             console.log('Open ' + result.address);
             if (result.args._open == false) {
                 console.log('Closed ' + result.address);
+                var lottery = lottery_map[result.address];
+                duplicate_lottery(lottery);
                 var wait_block = result.blockNumber + wait_blocks;
                 console.log('waiting for ' + wait_blocks + ' blocks from ' + eth.blockNumber + ' until ' + wait_block + ' for ' + result.address);
                 intervals[result.address] = setInterval(function () {
@@ -47,7 +49,6 @@ var add_lottery = function (address) {
                         call_lottery(result.address);
                     }
                 }, 10000);
-                open_event.stopWatching();
             }
         }
     });
@@ -58,8 +59,12 @@ var add_lottery = function (address) {
         if (result) {
             console.log('Result ' + result.args._result + ' for ' + result.address);
             var lottery = lottery_map[result.address];
-            duplicate_lottery(lottery);
-            result_event.stopWatching();
+            var accumulate_from = lottery.address;
+            if (lottery.winners_count() != 0) {
+                accumulate_from = null;
+                console.log('*  *  *  *  * * * * ***** WINNER ****** * * * * * *  *  *  *  *');
+            }
+            duplicate_lottery(lottery, accumulate_from);
         }
     });
 
@@ -81,19 +86,24 @@ var player = function () {
 };
 
 var play = function (address, guess) {
-    console.log('play 0x' + guess + ' on ' + address);
-    var lottery = lottery_map[address];
-    if (lottery.open() == true) {
-        admin.sleepBlocks(1);
-        lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
-            if (error) {
-                console.log(error);
-            }
-            if (result) {
-                console.log('played ' + guess + ' on ' + lottery.address);
-            }
-        });
-        admin.sleepBlocks(1);
+    if (guess.length == 2 && guess.match(/[0-9a-f]{2}/)) {
+        console.log('play 0x' + guess + ' on ' + address);
+        var lottery = lottery_map[address];
+        if (lottery.open() == true) {
+            admin.sleepBlocks(1);
+            lottery.play('0x' + guess, { from: owner, gas: gas, value: lottery.fee().toString(10) }, function (error, result) {
+                if (error) {
+                    console.log(error);
+                }
+                if (result) {
+                    console.log('played 0x' + guess + ' on ' + lottery.address);
+                }
+            });
+            admin.sleepBlocks(1);
+        }
+    }
+    else {
+        console.log('guess should be [0-9a-f]{2}');
     }
 };
 
@@ -136,24 +146,15 @@ var call_lottery = function (address) {
     admin.sleepBlocks(2);
 };
 
-var duplicate_lottery = function (lottery) {
-    var accumulate_from = lottery.address;
-    if (lottery.winners_count() != 0) {
-        accumulate_from = null;
-        console.log('*  *  *  *  * * * * ***** WINNER ****** * * * * * *  *  *  *  *');
-    }
+var duplicate_lottery = function (lottery, accumulate_from) {
+    var times = accumulate_from ? 2 : 1;
     deploy_lottery(
         lottery.fee().toString(10),
-        lottery.jackpot().times(2).toString(10),
+        lottery.jackpot().times(times).toString(10),
         lottery.owner_fee().toString(10),
         accumulate_from
     );
     admin.sleepBlocks(2);
-    deploy_lottery(
-        lottery.fee().toString(10),
-        lottery.jackpot().toString(10),
-        lottery.owner_fee().toString(10)
-    );
 };
 
 var deploy_first = function () {
