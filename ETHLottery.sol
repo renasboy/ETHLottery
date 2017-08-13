@@ -4,6 +4,10 @@ contract ETHLotteryManagerInterface {
     function register();
 }
 
+contract ETHLotteryInterface {
+    function accumulate();
+}
+
 contract ETHLottery {
     bytes32 public name = 'ETHLottery - Last 1 Byte Lottery';
     address public manager_address;
@@ -17,6 +21,8 @@ contract ETHLottery {
     uint256 public winners_count;
     bytes32 public result_hash;
     bytes1 public result;
+    address public accumulated_from;
+    address public accumulate_to;
 
     mapping (bytes1 => address[]) bettings;
     mapping (address => uint256) credits;
@@ -27,9 +33,9 @@ contract ETHLottery {
     event Play(address indexed _sender, bytes1 _byte, uint256 _time);
     event Withdraw(address indexed _sender, uint256 _amount, uint256 _time);
     event Destroy();
-    event Accumulate(uint256 _amount);
+    event Accumulate(address _accumulate_to, uint256 _amount);
 
-    function ETHLottery(address _manager, uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
+    function ETHLottery(address _manager, uint256 _fee, uint256 _jackpot, uint256 _owner_fee, address _accumulated_from) {
         owner = msg.sender;
         open = true;
         create_block = block.number; 
@@ -37,6 +43,13 @@ contract ETHLottery {
         fee = _fee;
         jackpot = _jackpot;
         owner_fee = _owner_fee;
+        // accumulate
+        if (_accumulated_from != owner) {
+            accumulated_from = _accumulated_from;
+            ETHLotteryInterface lottery = ETHLotteryInterface(accumulated_from);
+            lottery.accumulate();
+        }
+        // register with manager
         ETHLotteryManagerInterface manager = ETHLotteryManagerInterface(manager_address);
         manager.register();
         Open(open);
@@ -44,6 +57,14 @@ contract ETHLottery {
 
     modifier isOwner() {
         require(msg.sender == owner);
+        _;
+    }
+
+    modifier isOriginalOwner() {
+        // used tx.origin on purpose instead of
+        // msg.sender, as we want to get the original
+        // starter of the transaction to be owner
+        require(tx.origin == owner);
         _;
     }
 
@@ -64,6 +85,11 @@ contract ETHLottery {
 
     modifier hasPrize() {
         require(credits[msg.sender] > 0);
+        _;
+    }
+
+    modifier isAccumulated() {
+        require(result_hash != 0 && winners_count == 0);
         _;
     }
 
@@ -143,9 +169,10 @@ contract ETHLottery {
         return true;
     }
 
-    function accumulate(address _lottery) isClosed isOwner {
-        Accumulate(this.balance);
-        selfdestruct(_lottery);
+    function accumulate() isOriginalOwner isClosed isAccumulated {
+        accumulate_to = msg.sender;
+        Accumulate(msg.sender, this.balance);
+        selfdestruct(msg.sender);
     }
 
     function destruct() isClosed isOwner {

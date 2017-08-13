@@ -137,19 +137,16 @@ var call_lottery = function (address) {
 };
 
 var duplicate_lottery = function (lottery) {
-    if (lottery.winners_count() == 0) {
-        var accumulate = lottery.address;
-        console.log('accumulate value ' + eth.getBalance(lottery.address) + ' from ' + lottery.address);
-    }
-    else {
-        var accumulate = null;
+    var accumulate_from = lottery.address;
+    if (lottery.winners_count() != 0) {
+        accumulate_from = null;
         console.log('*  *  *  *  * * * * ***** WINNER ****** * * * * * *  *  *  *  *');
     }
     deploy_lottery(
         lottery.fee().toString(10),
         lottery.jackpot().times(2).toString(10),
         lottery.owner_fee().toString(10),
-        accumulate
+        accumulate_from
     );
     admin.sleepBlocks(2);
     deploy_lottery(
@@ -163,14 +160,20 @@ var deploy_first = function () {
     deploy_lottery(1000000000000000, 1000000000000000, 2);
 };
 
-var deploy_lottery = function (fee, jackpot, owner_fee, accumulate) {
+var deploy_lottery = function (fee, jackpot, owner_fee, accumulate_from) {
     console.log('Deploy')
     console.log('fee ' + fee);
     console.log('jackpot ' + jackpot);
     console.log('owner fee ' + owner_fee);
-    console.log('accumulate from ' + accumulate);
+    if (accumulate_from) {
+        console.log('accumulate value ' + eth.getBalance(accumulate_from) + ' from ' + accumulate_from);
+    }
+    else {
+        accumulate_from = owner;
+        console.log('do not accumulate');
+    }
     admin.sleepBlocks(2);
-    web3.eth.contract(lottery_abi).new(manager_address, fee, jackpot, owner_fee,
+    web3.eth.contract(lottery_abi).new(manager_address, fee, jackpot, owner_fee, accumulate_from,
         { from: owner, data: lottery_code, gas: gas },
         function (error, result) {
             if (error) {
@@ -181,28 +184,10 @@ var deploy_lottery = function (fee, jackpot, owner_fee, accumulate) {
                 if (result.address) {
                     console.log('created ' + result.address);
                     add_lottery(result.address);
-                    if (accumulate) {
-                        accumulate_lottery(result.address, accumulate);
-                    }
                 }
             }
         }
     );
-    admin.sleepBlocks(2);
-};
-
-var accumulate_lottery = function (address, accumulate) {
-    var lottery = lottery_map[accumulate];
-    admin.sleepBlocks(2);
-    lottery.accumulate(address, { from: owner, gas: gas }, function (error, result) {
-        if (error) {
-            console.log(error);
-        }
-        if (result) {
-            console.log('accumulate tx ' + result);
-            console.log('accumulated from ' + lottery.address + ' to ' + address);
-        }
-    });
     admin.sleepBlocks(2);
 };
 
