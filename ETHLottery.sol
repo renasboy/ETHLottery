@@ -12,6 +12,7 @@ contract ETHLottery {
     uint256 public jackpot;
     uint256 public fee;
     uint256 public owner_fee;
+    uint256 public create_block;
     uint256 public result_block;
     uint256 public winners_count;
     bytes32 public result_hash;
@@ -23,10 +24,15 @@ contract ETHLottery {
     event Balance(uint256 _balance);
     event Result(bytes1 _result);
     event Open(bool _open);
+    event Play(address indexed _sender, bytes1 _byte, uint256 _time);
+    event Withdraw(address indexed _sender, uint256 _amount, uint256 _time);
+    event Destroy();
+    event Accumulate(uint256 _amount);
 
     function ETHLottery(address _manager, uint256 _fee, uint256 _jackpot, uint256 _owner_fee) {
         owner = msg.sender;
         open = true;
+        create_block = block.number; 
         manager_address = _manager;
         fee = _fee;
         jackpot = _jackpot;
@@ -68,8 +74,8 @@ contract ETHLottery {
         _;
     }
     
-    function play(bytes1 _char) payable isOpen isPaid {
-        bettings[_char].push(msg.sender);
+    function play(bytes1 _byte) payable isOpen isPaid {
+        bettings[_byte].push(msg.sender);
         if (this.balance >= jackpot) {
             open = false;
             // block offset hardcoded to 10
@@ -86,6 +92,7 @@ contract ETHLottery {
             Open(open);
         }
         Balance(this.balance);
+        Play(msg.sender, _byte, now);
     }
 
     // This method is only used for testing purposes
@@ -128,6 +135,7 @@ contract ETHLottery {
             // transfer failed, return credit for withdraw
             credits[msg.sender] = credit;
         }
+        Withdraw(msg.sender, credit, now);
     }
 
     function register() isOwner {
@@ -136,10 +144,12 @@ contract ETHLottery {
     }
 
     function accumulate(address _lottery) isClosed isOwner {
+        Accumulate(this.balance);
         selfdestruct(_lottery);
     }
 
     function destruct() isClosed isOwner {
+        Destroy();
         selfdestruct(owner);
     }
 }
