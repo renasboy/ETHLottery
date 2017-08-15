@@ -1,6 +1,6 @@
 loadScript('bin/conf.js');
 
-var ETHAdmin = (function () {
+var ETHLotteryAdmin = (function () {
     var _gas = 3000000;
     var _wait_blocks = 10;
     var _lost_block = 250;
@@ -8,6 +8,8 @@ var ETHAdmin = (function () {
     var _manager_address = "0x88259b4a9d95ca2b237381047a6751e64ba06dd9";
     var _lottery_map = {};
     var _intervals = {};
+    var _open_events = {};
+    var _result_events = {};
 
     var _banner = function () {
         console.log('_________________________ ___   .____           __    __                       ');
@@ -53,7 +55,7 @@ var ETHAdmin = (function () {
 
         _lottery_map[address] = lottery;
 
-        var open_event = lottery.Open(function(error, result) {
+        _open_events[address] = lottery.Open(function(error, result) {
             if (error) {
                 console.log(error);
             }
@@ -61,6 +63,7 @@ var ETHAdmin = (function () {
                 console.log('Open ' + result.address);
                 if (result.args._open == false) {
                     console.log('Closed ' + result.address);
+                    _open_events[result.address].stopWatching();
                     var lottery = _lottery_map[result.address];
                     _duplicate_lottery(lottery);
                     var wait_block = result.blockNumber + _wait_blocks;
@@ -76,12 +79,13 @@ var ETHAdmin = (function () {
                 }
             }
         });
-        var result_event = lottery.Result(function(error, result) {
+        _result_events[address] = lottery.Result(function(error, result) {
             if (error) {
                 console.log(error);
             }
             if (result) {
                 console.log('Result ' + result.args._result + ' for ' + result.address);
+                _result_events[result.address].stopWatching();
                 var lottery = _lottery_map[result.address];
                 var accumulate_from = lottery.address;
                 if (lottery.winners_count() != 0) {
@@ -114,7 +118,6 @@ var ETHAdmin = (function () {
             console.log('play 0x' + guess + ' on ' + address);
             var lottery = _lottery_map[address];
             if (lottery.open() == true) {
-                admin.sleepBlocks(1);
                 lottery.play('0x' + guess, { from: _owner, gas: _gas, value: lottery.fee().toString(10) }, function (error, result) {
                     if (error) {
                         console.log(error);
@@ -123,7 +126,6 @@ var ETHAdmin = (function () {
                         console.log('played 0x' + guess + ' on ' + lottery.address);
                     }
                 });
-                admin.sleepBlocks(1);
             }
         }
         else {
@@ -139,7 +141,6 @@ var ETHAdmin = (function () {
                 eth.blockNumber > lottery.result_block().plus(_lost_block)) {
                 var hash = eth.getBlock(lottery.result_block()).hash;
                 if (hash) {
-                    admin.sleepBlocks(2);
                     lottery.manual_lottery(hash, { from: _owner, gas: _gas }, function (error, result) {
                         if (error) {
                             console.log(error);
@@ -149,7 +150,6 @@ var ETHAdmin = (function () {
                             console.log('manual lottery ' + lottery.address);
                         }
                     });
-                    admin.sleepBlocks(2);
                 }
             }
         }
@@ -157,7 +157,6 @@ var ETHAdmin = (function () {
 
     var _call_lottery = function (address) {
         var lottery = _lottery_map[address];
-        admin.sleepBlocks(2);
         lottery.lottery({ from: _owner, gas: _gas }, function (error, result) {
             if (error) {
                 console.log(error);
@@ -167,7 +166,6 @@ var ETHAdmin = (function () {
                 console.log('lottery ' + lottery.address);
             }
         });
-        admin.sleepBlocks(2);
     };
 
     var _duplicate_lottery = function (lottery, accumulate_from) {
@@ -178,7 +176,6 @@ var ETHAdmin = (function () {
             lottery.owner_fee().toString(10),
             accumulate_from
         );
-        admin.sleepBlocks(2);
     };
 
     var deploy_first = function () {
@@ -197,7 +194,6 @@ var ETHAdmin = (function () {
             accumulate_from = _owner;
             console.log('do not accumulate');
         }
-        admin.sleepBlocks(2);
         web3.eth.contract(lottery_abi).new(_manager_address, fee, jackpot, owner_fee, accumulate_from,
             { from: _owner, data: lottery_code, gas: _gas },
             function (error, result) {
@@ -213,7 +209,6 @@ var ETHAdmin = (function () {
                 }
             }
         );
-        admin.sleepBlocks(2);
     };
 
     return {
