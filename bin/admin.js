@@ -2,10 +2,10 @@ loadScript('bin/conf.js');
 
 var ETHLotteryAdmin = (function () {
     var _gas = 3000000;
-    var _wait_blocks = 10;
+    var _wait_blocks = 20;
     var _lost_block = 250;
     var _owner = "0xe581c6f0fae3bc426acfc660b36a7caf90f27987";
-    var _manager_address = "0x88259b4a9d95ca2b237381047a6751e64ba06dd9";
+    var _manager_address = "0xbeae579762f2ccf50b430d5b65b40e41ae7b1c06";
     var _lottery_map = {};
     var _intervals = {};
     var _open_events = {};
@@ -179,7 +179,7 @@ var ETHLotteryAdmin = (function () {
     };
 
     var deploy_first = function () {
-        _deploy_lottery(1000000000000000, 1000000000000000, 2);
+        _deploy_lottery(1000000000000000, 32000000000000000, 2);
     };
 
     var _deploy_lottery = function (fee, jackpot, owner_fee, accumulate_from) {
@@ -213,9 +213,9 @@ var ETHLotteryAdmin = (function () {
 
     return {
         start: start,
-        deploy_first: deploy_first,
+        deployFirst: deploy_first,
         play: play,
         player: player,
-        manual_lottery: manual_lottery
+        manualLottery: manual_lottery
     };
 })();

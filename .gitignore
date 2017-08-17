@@ -3,3 +3,7 @@
 /icons
 /managers
 /bin/conf
+/bin/conf.live
+/bin/conf.test
+/bin/start_live_node
+/bin/start_test_node
