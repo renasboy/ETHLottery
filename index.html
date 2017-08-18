@@ -6,6 +6,18 @@
 <script type="text/javascript" src="node_modules/bignumber.js/bignumber.min.js"></script>
 <script type="text/javascript" src="node_modules/web3/dist/web3-light.js"></script>
 <style>
+section {
+}
+article {
+    border: 3px dashed #ddd;
+    margin-bottom: 20px;
+}
+span[id$='-fee'] {
+    color: #800;
+}
+span[id$='-jackpot'] {
+    color: #080;
+}
 div {
     font-weight: bold;
 }
@@ -52,6 +64,10 @@ div span {
             });
         });
 
+        ETHLotteryManager.Register(function (e, r) {
+            add(r.address);
+        });
+
         if (!web3.eth.accounts[0]) {
             var interval = setInterval(function () {
                 if (web3.eth.accounts[0]) {
@@ -94,16 +110,23 @@ div span {
             var proxy = new Proxy(lottery_data(address, ETHLottery), {
                 set: function (obj, prop, value) {
                     obj[prop] = value;
-                    if (prop != 'contract') {
-                        document.getElementById(address + '-' + prop).innerText = value;
-                    }
+                    document.getElementById(address + '-' + prop).innerText = value;
                     return true;
                 }
             });
-            var all_events = ETHLottery.allEvents(function (e, r) {
+            var all_events = ETHLottery.allEvents({_sender: web3.eth.accounts[0] }, function (e, r) {
                 switch (r.event) {
                     case 'Open': 
                         lottery_map[r.address].open = r.args._open;
+                    break;
+
+                    case 'Play':
+                        var article = document.getElementById(r.address);
+                        var div = document.createElement('div');
+                        div.id = address + '-bet-' + r.args._byte;
+                        var text = document.createTextNode(r.args._time + ': ' + r.args._byte);
+                        div.appendChild(text);
+                        article.appendChild(div);
                     break;
 
                     case 'Balance':
@@ -118,12 +141,17 @@ div span {
                             input.id = r.address + '-' + 'withdraw';
                             input.type = 'button';
                             input.value = 'go get my ETHs.'
-                            input.maxlenght = 2;
                             input.addEventListener('click', function () {
                                 withdraw(r.address);
                             });
                             bet.appendChild(input);
                         }
+                    break;
+
+                    case 'Withdraw':
+                        var input = document.getElementById(r.address + 'withdraw');
+                        var text = document.createTextNode('withdraw ' + r.args._time  + ': ' + r.args._amount);
+                        input.parentNode.appendChild(text);
                     break;
 
                     case 'Accumulate':
@@ -158,7 +186,6 @@ div span {
                     input.id = address + '-' + 'withdraw';
                     input.type = 'button';
                     input.value = 'go get my ETHs.'
-                    input.maxlenght = 2;
                     input.addEventListener('click', function () {
                         withdraw(address);
                     });
@@ -238,7 +265,6 @@ div span {
             input.id = address + '-' + 'submit';
             input.type = 'button';
             input.value = 'go lucky byte, do you shit.'
-            input.maxlenght = 2;
             input.addEventListener('click', function () {
                 play(address);
             });
@@ -262,15 +288,6 @@ div span {
                     }
                     if (r) {
                         console.log('play tx ' + r);
-                        var play_event = lottery.contract.Play({_sender: web3.eth.accounts[0] }, function (e, r) {
-                            var article = document.getElementById(r.address);
-                            var div = document.createElement('div');
-                            div.id = address + '-bet-' + r.args._byte;
-                            var text = document.createTextNode(r.args._time + ': ' + r.args._byte);
-                            div.appendChild(text);
-                            article.appendChild(div);
-                            play_event.stopWatching();
-                        });
                     }
                 });
             }
@@ -289,14 +306,6 @@ div span {
                 }
                 if (r) {
                     console.log('withdraw tx ' + r);
-                    var withdraw_event = lottery.contract.Withdraw({_sender: web3.eth.accounts[0] }, function (e, r) {
-                        if (r) {
-                            var input = document.getElementById(r.address + 'withdraw');
-                            var text = document.createTextNode('withdraw ' + r.args._time  + ': ' + r.args._amount);
-                            input.parentNode.appendChild(text);
-                            withdraw_event.stopWatching();
-                        }
-                    });
                 }
             });
         };
