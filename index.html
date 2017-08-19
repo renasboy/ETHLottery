@@ -53,7 +53,10 @@ div span {
 
         var manager_address = '0xbf6608b9a5eb9095e5e4ff453e01e736448ca0b6';
 
-        var ETHLotteryManager = web3.eth.contract(manager_abi).at(manager_address);
+        var manager_contract = web3.eth.contract(manager_abi);
+        var lottery_contract = web3.eth.contract(lottery_abi);
+
+        var ETHLotteryManager = manager_contract.at(manager_address);
 
         var lottery_map = {};
 
@@ -109,7 +112,7 @@ div span {
             if (lottery_map[address]) {
                 return;
             }
-            var ETHLottery = web3.eth.contract(lottery_abi).at(address);
+            var ETHLottery = lottery_contract.at(address);
             var proxy = new Proxy(lottery_data(address, ETHLottery), {
                 set: function (obj, prop, value) {
                     obj[prop] = value;
