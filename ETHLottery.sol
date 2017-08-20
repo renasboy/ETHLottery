@@ -171,8 +171,9 @@ contract ETHLottery {
 
     function accumulate() isOriginalOwner isClosed isAccumulated {
         accumulate_to = msg.sender;
-        Accumulate(msg.sender, this.balance);
-        selfdestruct(msg.sender);
+        if (msg.sender.send(this.balance)) {
+            Accumulate(msg.sender, this.balance);
+        }
     }
 
     function destruct() isClosed isOwner {
