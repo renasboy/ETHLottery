@@ -6,6 +6,10 @@
 <script type="text/javascript" src="node_modules/bignumber.js/bignumber.min.js"></script>
 <script type="text/javascript" src="node_modules/web3/dist/web3-light.js"></script>
 <style>
+body, input, button {
+    font-family: monospace;
+    font-size: 1.2rem;
+}
 section {
 }
 article {
@@ -20,10 +24,12 @@ span[id$='-jackpot'] {
 }
 div {
     font-weight: bold;
+    margin: 10px 0;
+    border-bottom: 1px dotted #ccc;
 }
-
 div span {
     font-weight: normal;
+    float: right;
 }
 #error {
     color: #f00;
@@ -45,12 +51,12 @@ div span {
               var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
         }
 
-        var block_number = 0;
-        web3.eth.getBlockNumber(function (e, r) { block_number = r; });
+        var manager_address = '0xbf6608b9a5eb9095e5e4ff453e01e736448ca0b6';
 
-        var manager_address = '0xbeae579762f2ccf50b430d5b65b40e41ae7b1c06';
+        var manager_contract = web3.eth.contract(manager_abi);
+        var lottery_contract = web3.eth.contract(lottery_abi);
 
-        var ETHLotteryManager = web3.eth.contract(manager_abi).at(manager_address);
+        var ETHLotteryManager = manager_contract.at(manager_address);
 
         var lottery_map = {};
 
@@ -106,7 +112,7 @@ div span {
             if (lottery_map[address]) {
                 return;
             }
-            var ETHLottery = web3.eth.contract(lottery_abi).at(address);
+            var ETHLottery = lottery_contract.at(address);
             var proxy = new Proxy(lottery_data(address, ETHLottery), {
                 set: function (obj, prop, value) {
                     obj[prop] = value;
@@ -114,7 +120,7 @@ div span {
                     return true;
                 }
             });
-            var all_events = ETHLottery.allEvents({_sender: web3.eth.accounts[0] }, function (e, r) {
+            var all_events = ETHLottery.allEvents({_sender: [web3.eth.accounts[0]] }, function (e, r) {
                 switch (r.event) {
                     case 'Open': 
                         lottery_map[r.address].open = r.args._open;
@@ -170,33 +176,37 @@ div span {
 
         var collect_old_events = function (address) {
             var lottery = lottery_map[address];
-            var to_block = lottery.result_block > 0 ? lottery.result_block : block_number;
-            lottery.contract.Play({_sender: web3.eth.accounts[0]}, { fromBlock: lottery.create_block, toBlock: to_block }, function (e, r) {
-                var article = document.getElementById(r.address);
-                var div = document.createElement('div');
-                div.id = address + '-bet-' + r.args._byte;
-                var text = document.createTextNode(r.args._time + ': ' + r.args._byte);
-                div.appendChild(text);
-                article.appendChild(div);
-            });
-            if (lottery.result_hash) {
-                var bet = document.getElementById(address + '-bet-' + lottery.result);
-                if (bet) {
-                    var input = document.createElement('input');
-                    input.id = address + '-' + 'withdraw';
-                    input.type = 'button';
-                    input.value = 'go get my ETHs.'
-                    input.addEventListener('click', function () {
-                        withdraw(address);
-                    });
-                    bet.appendChild(input);
+            web3.eth.getBlockNumber(function (e, r) {
+                block_number = r;
+                var to_block = lottery.result_block > 0 ? lottery.result_block : block_number;
+                lottery.contract.Play({_sender: [web3.eth.accounts[0]]}, { fromBlock: lottery.create_block, toBlock: to_block }, function (e, r) {
+                    if (e) { console.log(e); return; }
+                    var article = document.getElementById(r.address);
+                    var div = document.createElement('div');
+                    div.id = address + '-bet-' + r.args._byte;
+                    var text = document.createTextNode(r.args._time + ': ' + r.args._byte);
+                    div.appendChild(text);
+                    article.appendChild(div);
+                });
+                if (lottery.result_hash) {
+                    var bet = document.getElementById(address + '-bet-' + lottery.result);
+                    if (bet) {
+                        var input = document.createElement('input');
+                        input.id = address + '-' + 'withdraw';
+                        input.type = 'button';
+                        input.value = 'go get my ETHs.'
+                        input.addEventListener('click', function () {
+                            withdraw(address);
+                        });
+                        bet.appendChild(input);
 
-                    lottery.contract.Withdraw({_sender: web3.eth.accounts[0]}, { fromBlock: lottery.create_block, toBlock: to_block }, function (e, r) {
-                        var text = document.createTextNode('withdraw ' + r.args._time  + ': ' + r.args._amount);
-                        bet.appendChild(text);
-                    });
+                        lottery.contract.Withdraw({_sender: [web3.eth.accounts[0]]}, { fromBlock: lottery.create_block, toBlock: to_block }, function (e, r) {
+                            var text = document.createTextNode('withdraw ' + r.args._time  + ': ' + r.args._amount);
+                            bet.appendChild(text);
+                        });
+                    }
                 }
-            }
+            });
         };
 
         var collect_data = function (address) {
