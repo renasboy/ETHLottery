@@ -4,8 +4,8 @@ var ETHLotteryAdmin = (function () {
     var _gas = 3000000;
     var _wait_blocks = 20;
     var _lost_block = 250;
-    var _owner = "0xe581c6f0fae3bc426acfc660b36a7caf90f27987";
-    var _manager_address = "0xbf6608b9a5eb9095e5e4ff453e01e736448ca0b6";
+    var _owner = "0x3a44fc70077511f4ea72171dd000021a2133158e";
+    var _manager_address = "0x0fd692e0d7629f169230c513a52934b70f1911bc";
     var _lottery_map = {};
     var _intervals = {};
     var _open_events = {};
@@ -118,7 +118,7 @@ var ETHLotteryAdmin = (function () {
             console.log('play 0x' + guess + ' on ' + address);
             var lottery = _lottery_map[address];
             if (lottery.open() == true) {
-                lottery.play('0x' + guess, { from: _owner, gas: _gas, value: lottery.fee().toString(10) }, function (error, result) {
+                lottery.play('0x' + guess, { from: _owner, gas: _gas, gasPrice: 1, value: lottery.fee().toString(10) }, function (error, result) {
                     if (error) {
                         console.log(error);
                     }
@@ -141,7 +141,7 @@ var ETHLotteryAdmin = (function () {
                 eth.blockNumber > lottery.result_block().plus(_lost_block)) {
                 var hash = eth.getBlock(lottery.result_block()).hash;
                 if (hash) {
-                    lottery.manual_lottery(hash, { from: _owner, gas: _gas }, function (error, result) {
+                    lottery.manual_lottery(hash, { from: _owner, gas: _gas, gasPrice: 1 }, function (error, result) {
                         if (error) {
                             console.log(error);
                         }
@@ -157,7 +157,7 @@ var ETHLotteryAdmin = (function () {
 
     var _call_lottery = function (address) {
         var lottery = _lottery_map[address];
-        lottery.lottery({ from: _owner, gas: _gas }, function (error, result) {
+        lottery.lottery({ from: _owner, gas: _gas, gasPrice: 1 }, function (error, result) {
             if (error) {
                 console.log(error);
             }
@@ -179,7 +179,7 @@ var ETHLotteryAdmin = (function () {
     };
 
     var deploy_first = function () {
-        _deploy_lottery(1000000000000000, 32000000000000000, 2);
+        _deploy_lottery(10000000000000000, 2560000000000000000, 2);
     };
 
     var _deploy_lottery = function (fee, jackpot, owner_fee, accumulate_from) {
@@ -195,7 +195,7 @@ var ETHLotteryAdmin = (function () {
             console.log('do not accumulate');
         }
         web3.eth.contract(lottery_abi).new(_manager_address, fee, jackpot, owner_fee, accumulate_from,
-            { from: _owner, data: lottery_code, gas: _gas },
+            { from: _owner, data: lottery_code, gas: _gas, gasPrice: 1 },
             function (error, result) {
                 if (error) {
                     console.log(error);
