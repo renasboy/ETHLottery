@@ -10,6 +10,7 @@ var ETHLotteryAdmin = (function () {
     var _intervals = {};
     var _open_events = {};
     var _result_events = {};
+    var _gas_price = web3.toWei(1, 'gwei');
 
     var _banner = function () {
         console.log('_________________________ ___   .____           __    __                       ');
@@ -118,7 +119,7 @@ var ETHLotteryAdmin = (function () {
             console.log('play 0x' + guess + ' on ' + address);
             var lottery = _lottery_map[address];
             if (lottery.open() == true) {
-                lottery.play('0x' + guess, { from: _owner, gas: _gas, gasPrice: 1, value: lottery.fee().toString(10) }, function (error, result) {
+                lottery.play('0x' + guess, { from: _owner, gas: _gas, gasPrice: _gas_price, value: lottery.fee().toString(10) }, function (error, result) {
                     if (error) {
                         console.log(error);
                     }
@@ -141,7 +142,7 @@ var ETHLotteryAdmin = (function () {
                 eth.blockNumber > lottery.result_block().plus(_lost_block)) {
                 var hash = eth.getBlock(lottery.result_block()).hash;
                 if (hash) {
-                    lottery.manual_lottery(hash, { from: _owner, gas: _gas, gasPrice: 1 }, function (error, result) {
+                    lottery.manual_lottery(hash, { from: _owner, gas: _gas, gasPrice: _gas_price }, function (error, result) {
                         if (error) {
                             console.log(error);
                         }
@@ -157,7 +158,7 @@ var ETHLotteryAdmin = (function () {
 
     var _call_lottery = function (address) {
         var lottery = _lottery_map[address];
-        lottery.lottery({ from: _owner, gas: _gas, gasPrice: 1 }, function (error, result) {
+        lottery.lottery({ from: _owner, gas: _gas, gasPrice: _gas_price }, function (error, result) {
             if (error) {
                 console.log(error);
             }
@@ -195,7 +196,7 @@ var ETHLotteryAdmin = (function () {
             console.log('do not accumulate');
         }
         web3.eth.contract(lottery_abi).new(_manager_address, fee, jackpot, owner_fee, accumulate_from,
-            { from: _owner, data: lottery_code, gas: _gas, gasPrice: 1 },
+            { from: _owner, data: lottery_code, gas: _gas, gasPrice: _gas_price },
             function (error, result) {
                 if (error) {
                     console.log(error);
