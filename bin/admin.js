@@ -179,8 +179,8 @@ var ETHLotteryAdmin = (function () {
         );
     };
 
-    var deploy_first = function () {
-        _deploy_lottery(10000000000000000, 2560000000000000000, 2);
+    var deploy_first = function (fee, jackpot) {
+        _deploy_lottery(fee, jackpot, 2);
     };
 
     var _deploy_lottery = function (fee, jackpot, owner_fee, accumulate_from) {
